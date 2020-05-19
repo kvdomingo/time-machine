@@ -233,5 +233,6 @@ dist
 # TernJS port file
 .tern-port
 
-# Compiled webpack bundles
+# Webpack bundles
 bundles/
+webpack-stats.json
