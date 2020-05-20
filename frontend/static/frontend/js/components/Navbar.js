@@ -8,6 +8,7 @@ import {
     MDBNavbarToggler as NavbarToggler,
     MDBCollapse as Collapse,
 } from 'mdbreact';
+import { Image } from 'cloudinary-react';
 
 
 export default class Navigation extends Component {
@@ -24,13 +25,25 @@ export default class Navigation extends Component {
 
     render() {
         return (
-            <Navbar color='black' dark expand='md'>
-                <NavbarBrand>Timing Machine</NavbarBrand>
+            <Navbar color='white' light expand='md' style={{ boxShadow: 'none' }}>
+                <NavbarBrand>
+                    <Image
+                        cloudName='kdphotography-assets'
+                        publicId='time-machine/logo'
+                        secure
+                        responsive
+                        responsiveUseBreakpoints
+                        height='30'
+                        />
+                </NavbarBrand>
                 <NavbarToggler onClick={this.toggleCollapse} />
                 <Collapse id='navbar' isOpen={this.state.isOpen} navbar>
                     <NavbarNav right>
                         <NavItem>
-                            <NavLink to='#!' onClick={this.props.handleLogout}>Logout</NavLink>
+                            <NavLink to='/'>{this.props.username}</NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink to='' onClick={this.props.handleLogout}>Logout</NavLink>
                         </NavItem>
                     </NavbarNav>
                 </Collapse>

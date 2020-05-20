@@ -27,6 +27,7 @@ export default class Form extends Component {
 
     toggleForm = () => {
         this.setState(prevState => ({ loginForm: !prevState.loginForm }));
+        this.props.resetLogin();
     }
 
     render() {
@@ -42,15 +43,10 @@ export default class Form extends Component {
                             <Typography tag='h1' variant='display-5'>Login</Typography>
                         </CardHeader>
                         <CardBody>
-                            <Login handleLogin={this.props.handleLogin} />
+                            <Login {...this.props} />
                         </CardBody>
                         <CardFooter>
-                            <a
-                                href='#!'
-                                onClick={this.toggleForm}
-                                >
-                                Sign up
-                            </a>
+                            <a className='text-primary' onClick={this.toggleForm}>Sign up</a>
                         </CardFooter>
                     </React.Fragment>
                     : <React.Fragment>
@@ -58,15 +54,10 @@ export default class Form extends Component {
                             <Typography tag='h1' variant='display-5'>Signup</Typography>
                         </CardHeader>
                         <CardBody>
-                            <Signup handleSignup={this.props.handleSignup} />
+                            <Signup {...this.props} />
                         </CardBody>
                         <CardFooter>
-                            <a
-                                href='#!'
-                                onClick={this.toggleForm}
-                                >
-                                Login
-                            </a>
+                            <a className='text-primary' onClick={this.toggleForm}>Login</a>
                         </CardFooter>
                     </React.Fragment>
                 }

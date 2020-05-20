@@ -11,12 +11,30 @@ export default class Signup extends Component {
             email: '',
             username: '',
             password: '',
+            validEmail: true,
+            validPassword: true,
         };
     }
 
     handleChange = e => {
         let { name, value } = e.target;
         this.setState({ [name]: value });
+    }
+
+    validateEmail = e => {
+        this.handleChange(e);
+        let { value } = e.target;
+        let emailExp = /^\w+@[a-zA-Z_]+?(\.[a-zA-Z]+)+$/g;
+        let validEmail = emailExp.test(value);
+        this.setState({ validEmail });
+    }
+
+    validatePassword = e => {
+        this.handleChange(e);
+        let { value } = e.target;
+        let passExp = /^.{8,}$/g;
+        let validPassword = passExp.test(value);
+        this.setState({ validPassword });
     }
 
     render() {
@@ -29,8 +47,12 @@ export default class Signup extends Component {
                         name='email'
                         className='form-control'
                         value={this.state.email}
-                        onChange={this.handleChange}
+                        onChange={this.validateEmail}
                         />
+                    {(this.state.validEmail)
+                        ? null
+                        : <div className='text-danger'>Please use a valid email</div>
+                    }
                 </div>
                 <div className='form-group'>
                     <label htmlFor='username'>Username</label>
@@ -49,8 +71,12 @@ export default class Signup extends Component {
                         name='password'
                         className='form-control'
                         value={this.state.password}
-                        onChange={this.handleChange}
+                        onChange={this.validatePassword}
                         />
+                    {(this.state.validPassword)
+                        ? null
+                        : <div className='text-danger'>Password must be at least 8 characters long</div>
+                    }
                 </div>
                 <input
                     type='submit'

@@ -1,5 +1,5 @@
 import React, { Component, Suspense } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import {
     MDBContainer as Container,
 } from 'mdbreact';
@@ -7,7 +7,9 @@ import Cookies from 'js-cookie';
 import Loading from './Loading';
 import Navbar from './Navbar';
 import Form from './Login/Form';
-import CheckIn from './CheckIn';
+import CheckIn from './CheckIn/CheckIn';
+import Http404 from './Http404';
+import './App.css';
 
 
 export default class App extends Component {
@@ -16,6 +18,7 @@ export default class App extends Component {
         this.state = {
             loggedIn: localStorage.getItem('token') ? true : false,
             username: '',
+            loginError: false,
         };
     }
 
@@ -27,8 +30,16 @@ export default class App extends Component {
                 },
             })
                 .then(res => res.json())
-                .then(data => this.setState({ username: data.username }));
+                .then(data => {
+                    data = { ...data };
+                    if (data.detail === 'Signature has expired.') this.setState({ loggedIn: false });
+                    else this.setState({ username: data.username });
+                });
         }
+    }
+
+    resetLogin = () => {
+        this.setState({ loginError: false });
     }
 
     handleLogin = (e, data) => {
@@ -38,7 +49,11 @@ export default class App extends Component {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                username: data.username,
+                email: data.email,
+                password: data.password,
+            })
         })
             .then(res => res.json())
             .then(data => {
@@ -47,7 +62,8 @@ export default class App extends Component {
                     loggedIn: true,
                     username: data.user.username,
                 });
-            });
+            })
+            .catch(err => this.setState({ loginError: true }));
     }
 
     handleSignup = (e, data) => {
@@ -80,20 +96,26 @@ export default class App extends Component {
         return (
             <Router>
                 <Suspense fallback={<Loading />}>
-                    {(!this.state.loggedIn)
-                        ? <Container className='my-5 mt-5'>
-                            <Form
-                                handleLogin={this.handleLogin}
-                                handleSignup={this.handleSignup}
-                                handleLogout={this.handleLogout}
-                                {...this.state}
-                                />
-                        </Container>
-                        : <React.Fragment>
-                            <Navbar handleLogout={this.handleLogout} />
-                            <CheckIn />
-                        </React.Fragment>
-                    }
+                    <Switch>
+                        <Route exact path='/'>
+                            {(!this.state.loggedIn)
+                                ? <Container className='my-5 mt-5'>
+                                    <Form
+                                        handleLogin={this.handleLogin}
+                                        handleSignup={this.handleSignup}
+                                        handleLogout={this.handleLogout}
+                                        resetLogin={this.resetLogin}
+                                        {...this.state}
+                                        />
+                                </Container>
+                                : <React.Fragment>
+                                    <Navbar handleLogout={this.handleLogout} {...this.state} />
+                                    <CheckIn {...this.state} />
+                                </React.Fragment>
+                            }
+                        </Route>
+                        <Route component={Http404} status={404} />
+                    </Switch>
                 </Suspense>
             </Router>
         );

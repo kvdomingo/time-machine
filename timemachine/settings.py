@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from jinja2 import DebugUndefined, Undefined
 from dotenv import load_dotenv
 
@@ -132,8 +133,12 @@ if not DEBUG:
         'rest_framework.renderers.JSONRenderer',
     ]
 
+
 JWT_AUTH = {
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'backend.utils.jwt_response_handler',
+    'JWT_EXPIRATION_DELTA': timedelta(days=1),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=7),
 }
 
 

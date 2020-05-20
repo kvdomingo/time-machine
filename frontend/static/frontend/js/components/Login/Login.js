@@ -41,6 +41,10 @@ export default class Login extends Component {
                         onChange={this.handleChange}
                         />
                 </div>
+                {(this.props.loginError)
+                    ? <div className='text-danger my-3'>Invalid login credentials</div>
+                    : null
+                }
                 <input
                     type='submit'
                     name='submit'
