@@ -1,7 +1,4 @@
 import React, { Component } from 'react';
-import {
-    MDBTypography as Typography,
-} from 'mdbreact';
 
 
 export default class Signup extends Component {
@@ -9,10 +6,14 @@ export default class Signup extends Component {
         super(props);
         this.state = {
             email: '',
+            firstName: '',
+            lastName: '',
             username: '',
             password: '',
+            repeatPassword: '',
             validEmail: true,
             validPassword: true,
+            validRepeatPassword: true,
         };
     }
 
@@ -37,9 +38,38 @@ export default class Signup extends Component {
         this.setState({ validPassword });
     }
 
+    validateRepeatPassword = e => {
+        this.handleChange(e);
+        let { value } = e.target;
+        let validRepeatPassword = (this.state.password === value);
+        this.setState({ validRepeatPassword });
+    }
+
     render() {
         return (
             <form onSubmit={(e) => {this.props.handleSignup(e, this.state)}}>
+                <div className='form-group'>
+                    <label htmlFor='username'>First name</label>
+                    <input
+                        type='text'
+                        name='firstName'
+                        className='form-control'
+                        value={this.state.firstName}
+                        onChange={this.handleChange}
+                        required
+                        />
+                </div>
+                <div className='form-group'>
+                    <label htmlFor='username'>Last name</label>
+                    <input
+                        type='text'
+                        name='lastName'
+                        className='form-control'
+                        value={this.state.lastName}
+                        onChange={this.handleChange}
+                        required
+                        />
+                </div>
                 <div className='form-group'>
                     <label htmlFor='email'>Email</label>
                     <input
@@ -48,6 +78,7 @@ export default class Signup extends Component {
                         className='form-control'
                         value={this.state.email}
                         onChange={this.validateEmail}
+                        required
                         />
                     {(this.state.validEmail)
                         ? null
@@ -62,6 +93,7 @@ export default class Signup extends Component {
                         className='form-control'
                         value={this.state.username}
                         onChange={this.handleChange}
+                        required
                         />
                 </div>
                 <div className='form-group'>
@@ -72,12 +104,34 @@ export default class Signup extends Component {
                         className='form-control'
                         value={this.state.password}
                         onChange={this.validatePassword}
+                        required
                         />
                     {(this.state.validPassword)
                         ? null
                         : <div className='text-danger'>Password must be at least 8 characters long</div>
                     }
                 </div>
+                <div className='form-group'>
+                    <label htmlFor='password'>Repeat password</label>
+                    <input
+                        type='password'
+                        name='repeatPassword'
+                        className='form-control'
+                        value={this.state.repeatPassword}
+                        onChange={this.validateRepeatPassword}
+                        required
+                        />
+                    {(this.state.validRepeatPassword)
+                        ? null
+                        : <div className='text-danger'>Passwords do not match</div>
+                    }
+                </div>
+                {(this.props.loginErrorInfo)
+                    ? <div className='text-danger'>
+                        {this.props.loginErrorInfo}
+                    </div>
+                    : null
+                }
                 <input
                     type='submit'
                     name='submit'

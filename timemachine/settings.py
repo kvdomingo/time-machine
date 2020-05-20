@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'corsheaders',
-    'knox',
     'webpack_loader',
 ]
 
@@ -121,7 +120,6 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'knox.auth.TokenAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',

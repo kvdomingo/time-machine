@@ -11,7 +11,7 @@ export default class CheckInList extends Component {
     render() {
         return (
             this.props.checkIns.map((checkIn, i) => (
-                <React.Fragment>
+                <React.Fragment key={`li-${i}`}>
                     {(i === 0)
                         ? <li className='list-group-item blue-grey lighten-5' key='today'>
                             <b>{checkIn.displayDate}</b>

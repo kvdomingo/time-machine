@@ -5,6 +5,7 @@ import {
     MDBIcon as Icon,
     MDBListGroup as ListGroup,
     MDBListGroupItem as ListGroupItem,
+    MDBTypography as Typography,
     MDBRow as Row,
     MDBCol as Col,
 } from 'mdbreact';
@@ -28,6 +29,8 @@ export default class CheckIn extends Component {
             stats: {},
             isLoaded: false,
             addDialogOpen: false,
+            validTag: true,
+            validDuration: true,
         };
     }
 
@@ -81,7 +84,7 @@ export default class CheckIn extends Component {
                 duration: data.duration,
                 tag: data.tag,
                 activities: data.activities,
-                author: this.state.checkIns[0].author,
+                author: this.props.userId,
             }),
         })
             .then(res => res.json())
@@ -107,6 +110,8 @@ export default class CheckIn extends Component {
             duration: '',
             tag: '',
             activities: '',
+            validTag: true,
+            validDuration: true,
         });
         this.toggleModal();
     }
@@ -115,11 +120,29 @@ export default class CheckIn extends Component {
         this.setState(prevState => ({ addDialogOpen: !prevState.addDialogOpen }));
     }
 
+    validateTag = (e) => {
+        this.handleChange(e);
+        let { value } = e.target;
+        let tagExp = /^\S*$/g;
+        let validTag = tagExp.test(value);
+        this.setState({ validTag });
+    }
+
+    validateDuration = (e) => {
+        this.handleChange(e);
+        let { value } = e.target;
+        let durExp = /^\d+(\.\d+)?$/g;
+        let validDuration = durExp.test(value);
+        this.setState({ validDuration });
+    }
+
     render() {
         if (!this.state.isLoaded) return <Loading />;
         else return (
             <Container className='my-5'>
-                <Button color='primary' className='mx-0' style={{ boxShadow: 'none' }} onClick={this.toggleModal}>
+                <Typography tag='h2' variant='display-4'>Welcome, {this.props.firstName}!</Typography>
+                <Typography tag='h3' variant='h4-responsive'>Today is {dateFormat(this.state.date, 'dddd, d mmmm yyyy')}</Typography>
+                <Button color='primary' className='mx-0 mt-5' style={{ boxShadow: 'none' }} onClick={this.toggleModal}>
                     <Icon fas icon='plus' className='mr-2' />Check-in
                 </Button>
                 <Row>
@@ -127,6 +150,8 @@ export default class CheckIn extends Component {
                         <AddModal
                             toggleModal={this.toggleModal}
                             handleChange={this.handleChange}
+                            validateTag={this.validateTag}
+                            validateDuration={this.validateDuration}
                             addCheckIn={this.addCheckIn}
                             clearForm={this.clearForm}
                             {...this.state}

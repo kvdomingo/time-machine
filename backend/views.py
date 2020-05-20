@@ -38,9 +38,8 @@ class CheckInList(APIView):
     def post(self, request, format=None):
         serializer = CheckInSerializer(data=request.data)
         if serializer.is_valid():
-            checkin = serializer.save()
-            if checkin:
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):

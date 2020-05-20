@@ -7,7 +7,7 @@ communicated to and understood by the frontend.
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from rest_framework.settings import api_settings
+from rest_framework_jwt.settings import api_settings
 from .models import CheckIn
 
 
@@ -20,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
     """ Serializes non-sensitive information about the currently logged-in user"""
     class Meta:
         model = User
-        fields = ['username', 'id', 'email']
+        fields = ['username', 'id', 'email', 'first_name', 'last_name']
 
 
 class UserSerializerWithToken(serializers.ModelSerializer):
@@ -46,7 +46,7 @@ class UserSerializerWithToken(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['token', 'id', 'email', 'username', 'password']
+        fields = ['token', 'id', 'email', 'username', 'password', 'first_name', 'last_name']
 
 
 class CheckInSerializer(serializers.ModelSerializer):

@@ -21,10 +21,16 @@ export default class AddModal extends Component {
                                 type='number'
                                 name='duration'
                                 placeholder='Duration (hours)'
-                                onChange={this.props.handleChange}
+                                onChange={this.props.validateDuration}
                                 value={this.props.duration}
                                 className='form-control'
                                 />
+                            {(this.props.validDuration)
+                                ? null
+                                : <div className='text-danger'>
+                                    Duration must be a number.
+                                </div>
+                            }
                         </div>
                         <div className='input-group'>
                             <div className='input-group-prepend'>
@@ -36,12 +42,18 @@ export default class AddModal extends Component {
                                 type='text'
                                 name='tag'
                                 placeholder='Tag'
-                                onChange={this.props.handleChange}
+                                onChange={this.props.validateTag}
                                 value={this.props.tag}
                                 className='form-control'
                                 aria-describedby='basic-addon'
                                 />
                         </div>
+                        {(this.props.validTag)
+                            ? null
+                            : <div className='text-danger'>
+                                Tags must not contain spaces.
+                            </div>
+                        }
                         <div className='form-group mt-3'>
                             <input
                                 type='text'

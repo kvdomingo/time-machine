@@ -1,15 +1,16 @@
-import React, { Component, Suspense } from 'react';
+import React, { Component, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import {
     MDBContainer as Container,
 } from 'mdbreact';
 import Cookies from 'js-cookie';
 import Loading from './Loading';
-import Navbar from './Navbar';
 import Form from './Login/Form';
-import CheckIn from './CheckIn/CheckIn';
-import Http404 from './Http404';
 import './App.css';
+
+const Navbar = lazy(() => import('./Navbar'));
+const CheckIn = lazy(() => import('./CheckIn/CheckIn'));
+const Http404 = lazy(() => import('./Http404'));
 
 
 export default class App extends Component {
@@ -18,8 +19,13 @@ export default class App extends Component {
         this.state = {
             loggedIn: localStorage.getItem('token') ? true : false,
             username: '',
+            userId: '',
+            firstName: '',
+            lastName: '',
             loginError: false,
+            loginErrorInfo: '',
         };
+        this.loggedOutState = { ...this.state, loggedIn: false };
     }
 
     componentDidMount() {
@@ -32,14 +38,21 @@ export default class App extends Component {
                 .then(res => res.json())
                 .then(data => {
                     data = { ...data };
-                    if (data.detail === 'Signature has expired.') this.setState({ loggedIn: false });
-                    else this.setState({ username: data.username });
+                    if (data.detail === 'Signature has expired.') this.resetLogin();
+                    else this.setState({
+                        loggedIn: true,
+                        username: data.username,
+                        userId: data.id,
+                        firstName: data.first_name,
+                        lastName: data.last_name,
+                    });
                 });
         }
     }
 
     resetLogin = () => {
-        this.setState({ loginError: false });
+        localStorage.removeItem('token');
+        this.setState({ ...this.loggedOutState });
     }
 
     handleLogin = (e, data) => {
@@ -51,7 +64,6 @@ export default class App extends Component {
             },
             body: JSON.stringify({
                 username: data.username,
-                email: data.email,
                 password: data.password,
             })
         })
@@ -61,13 +73,16 @@ export default class App extends Component {
                 this.setState({
                     loggedIn: true,
                     username: data.user.username,
+                    userId: data.user.id,
+                    firstName: data.user.first_name,
+                    lastName: data.user.last_name,
                 });
             })
-            .catch(err => this.setState({ loginError: true }));
     }
 
     handleSignup = (e, data) => {
         e.preventDefault();
+        if (!data.validRepeatPassword) return false;
         const csrftoken = Cookies.get('csrftoken');
         fetch('/api/auth/users', {
             method: 'POST',
@@ -75,21 +90,32 @@ export default class App extends Component {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrftoken,
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                email: data.email,
+                username: data.username,
+                password: data.password,
+                first_name: data.firstName,
+                last_name: data.lastName,
+            })
         })
             .then(res => res.json())
             .then(data => {
+                if (data.username[0] === 'A user with that username already exists.') throw data.username[0];
                 localStorage.setItem('token', data.token);
                 this.setState({
                     loggedIn: true,
                     username: data.username,
+                    userId: data.userId,
+                    firstName: data.first_name,
+                    lastName: data.last_name,
                 });
-            });
+            })
+            .catch(err => this.setState({ loginErrorInfo: err }));
     }
 
     handleLogout = () => {
         localStorage.removeItem('token');
-        this.setState({ loggedIn: false, username: '' });
+        this.setState({ ...this.loggedOutState });
     }
 
     render() {
