@@ -4,6 +4,7 @@ import {
     MDBBtn as Button,
     MDBIcon as Icon,
     MDBListGroup as ListGroup,
+    MDBListGroupItem as ListGroupItem,
     MDBRow as Row,
     MDBCol as Col,
 } from 'mdbreact';
@@ -11,7 +12,7 @@ import AddModal from './AddModal';
 import CheckInList from './CheckInList';
 import Stats from '../Stats/Stats';
 import Loading from '../Loading';
-import dateFormat from 'dateFormat';
+import dateFormat from 'dateformat';
 import Cookies from 'js-cookie';
 import '../App.css'
 
@@ -131,10 +132,17 @@ export default class CheckIn extends Component {
                             {...this.state}
                             />
                         <ListGroup>
-                            <CheckInList
-                                deleteCheckIn={this.deleteCheckIn}
-                                {...this.state}
-                                />
+                            {(this.state.checkIns.length > 0)
+                                ? <CheckInList
+                                    deleteCheckIn={this.deleteCheckIn}
+                                    {...this.state}
+                                    />
+                                : <ListGroupItem
+                                    className='blue-grey lighten-5 text-center'
+                                    >
+                                    You don't have any check-ins yet. Get started by clicking the button above.
+                                </ListGroupItem>
+                            }
                         </ListGroup>
                     </Col>
                     <Col>

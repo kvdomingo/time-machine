@@ -32,10 +32,15 @@ export default class Stats extends Component {
             <Card style={{ boxShadow: 'none', border: '1px solid rgb(224, 224, 224)' }}>
                 <CardHeader>Time spent in hours per tag</CardHeader>
                 <CardBody>
-                    <Pie
-                        data={this.state.dataPie}
-                        options={this.state.options}
-                        />
+                    {(Object.keys(this.props.stats).length > 0)
+                        ? <Pie
+                            data={this.state.dataPie}
+                            options={this.state.options}
+                            />
+                        : <div className='text-center text-muted'>
+                            No data available
+                        </div>
+                    }
                 </CardBody>
             </Card>
         );
