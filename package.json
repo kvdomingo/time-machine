@@ -66,7 +66,6 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",
     "@loadable/component": "^5.12.0",
-    "aos": "^2.3.4",
     "bootstrap-css-only": "^4.4.1",
     "chartjs": "^0.3.24",
     "chartjs-plugin-colorschemes": "^0.4.0",
@@ -75,14 +74,10 @@
     "i": "^0.3.6",
     "js-cookie": "^2.2.1",
     "mdbreact": "^4.26.0",
-    "plotly.js": "^1.54.1",
     "react": "^16.13.1",
     "react-chartjs-2": "^2.9.0",
     "react-dom": "^16.13.1",
-    "react-flip-move": "^3.0.4",
     "react-fontawesome": "^1.7.1",
-    "react-helmet": "^6.0.0",
-    "react-plotly.js": "^2.4.0",
     "react-router-dom": "^5.1.2"
   }
 }

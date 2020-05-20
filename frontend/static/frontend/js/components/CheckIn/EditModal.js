@@ -12,8 +12,8 @@ import {
 export default class AddModal extends Component {
     render() {
         return (
-            <Modal isOpen={this.props.modalOpen} toggle={this.props.toggleModal}>
-                <ModalHeader toggle={this.props.toggleModal}>Check-in</ModalHeader>
+            <Modal isOpen={this.props.addDialogOpen} toggle={this.props.toggleModal}>
+                <ModalHeader toggle={this.props.toggleModal}>Add check-in</ModalHeader>
                 <ModalBody>
                     <form>
                         <div className='form-group'>
@@ -67,8 +67,7 @@ export default class AddModal extends Component {
                     </form>
                 </ModalBody>
                 <ModalFooter>
-
-                    <Button color='primary' onClick={(e) => this.props.createUpdateCheckIn(e, this.props)}>Add</Button>
+                    <Button color='primary' onClick={(e) => this.props.addCheckIn(e, this.props)}>Add</Button>
                     <Button color='blue-grey' onClick={this.props.clearForm}>Cancel</Button>
                 </ModalFooter>
             </Modal>

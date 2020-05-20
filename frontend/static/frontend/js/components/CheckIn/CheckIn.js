@@ -26,9 +26,8 @@ export default class CheckIn extends Component {
             tag: '',
             activities: '',
             checkIns: [],
-            stats: {},
             isLoaded: false,
-            addDialogOpen: false,
+            modalOpen: false,
             validTag: true,
             validDuration: true,
         };
@@ -53,16 +52,12 @@ export default class CheckIn extends Component {
             .then(res => res.json())
             .then(checkIns => {
                 checkIns = [ ...checkIns ]
-                let stats = {};
                 checkIns.forEach((checkIn, i) => {
                     let date = new Date(checkIn.created)
                     checkIn.date = date;
                     checkIn.displayDate = dateFormat(date, 'dd mmm yyyy');
-                    stats[checkIn.tag] = (stats[checkIn.tag])
-                        ? stats[checkIn.tag] + checkIn.duration
-                        : checkIn.duration;
                 });
-                this.setState({ checkIns, stats, isLoaded: true })
+                this.setState({ checkIns, isLoaded: true })
             });
     }
 
@@ -71,7 +66,7 @@ export default class CheckIn extends Component {
         this.setState({ [name]: value });
     }
 
-    addCheckIn = (e, data) => {
+    createUpdateCheckIn = (e, data) => {
         e.preventDefault();
         fetch('/api/checkins', {
             method: 'POST',
@@ -116,8 +111,8 @@ export default class CheckIn extends Component {
         this.toggleModal();
     }
 
-    toggleModal = () => {
-        this.setState(prevState => ({ addDialogOpen: !prevState.addDialogOpen }));
+    toggleModal = (e) => {
+        this.setState(prevState => ({ modalOpen: !prevState.modalOpen }));
     }
 
     validateTag = (e) => {
@@ -141,12 +136,12 @@ export default class CheckIn extends Component {
         else return (
             <Container className='my-5'>
                 <Typography tag='h2' variant='display-4'>Welcome, {this.props.firstName}!</Typography>
-                <Typography tag='h3' variant='h4-responsive'>Today is {dateFormat(this.state.date, 'dddd, d mmmm yyyy')}</Typography>
+                <Typography tag='h3' variant='h4-responsive'>Today is {dateFormat(this.state.date, 'dddd, d mmmm yyyy')}.</Typography>
                 <Button color='primary' className='mx-0 mt-5' style={{ boxShadow: 'none' }} onClick={this.toggleModal}>
                     <Icon fas icon='plus' className='mr-2' />Check-in
                 </Button>
                 <Row>
-                    <Col>
+                    <Col className='mb-4'>
                         <AddModal
                             toggleModal={this.toggleModal}
                             handleChange={this.handleChange}

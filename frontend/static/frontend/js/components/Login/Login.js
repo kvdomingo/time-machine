@@ -49,7 +49,7 @@ export default class Login extends Component {
                     type='submit'
                     name='submit'
                     value='Submit'
-                    className='btn btn-primary'
+                    className='btn btn-primary ml-0'
                     />
             </form>
         );
