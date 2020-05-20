@@ -66,7 +66,7 @@ export default class CheckIn extends Component {
         this.setState({ [name]: value });
     }
 
-    createUpdateCheckIn = (e, data) => {
+    addCheckIn = (e, data) => {
         e.preventDefault();
         fetch('/api/checkins', {
             method: 'POST',

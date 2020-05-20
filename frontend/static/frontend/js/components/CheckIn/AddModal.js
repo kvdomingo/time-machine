@@ -68,7 +68,7 @@ export default class AddModal extends Component {
                 </ModalBody>
                 <ModalFooter>
 
-                    <Button color='primary' onClick={(e) => this.props.createUpdateCheckIn(e, this.props)}>Add</Button>
+                    <Button color='primary' onClick={(e) => this.props.addCheckIn(e, this.props)}>Add</Button>
                     <Button color='blue-grey' onClick={this.props.clearForm}>Cancel</Button>
                 </ModalFooter>
             </Modal>
