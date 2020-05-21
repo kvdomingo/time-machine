@@ -34,6 +34,7 @@ export default class Navigation extends Component {
                         responsive
                         responsiveUseBreakpoints
                         height='30'
+                        dpr='auto'
                         />
                 </NavbarBrand>
                 <NavbarToggler onClick={this.toggleCollapse} />

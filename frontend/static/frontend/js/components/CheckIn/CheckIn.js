@@ -51,7 +51,6 @@ export default class CheckIn extends Component {
         })
             .then(res => res.json())
             .then(checkIns => {
-                checkIns = [ ...checkIns ]
                 checkIns.forEach((checkIn, i) => {
                     let date = new Date(checkIn.created)
                     checkIn.date = date;
@@ -141,7 +140,7 @@ export default class CheckIn extends Component {
                     <Icon fas icon='plus' className='mr-2' />Check-in
                 </Button>
                 <Row>
-                    <Col className='mb-4'>
+                    <Col md='6' className='mb-4'>
                         <AddModal
                             toggleModal={this.toggleModal}
                             handleChange={this.handleChange}
@@ -165,7 +164,7 @@ export default class CheckIn extends Component {
                             }
                         </ListGroup>
                     </Col>
-                    <Col>
+                    <Col md='6'>
                         <Stats {...this.state} />
                     </Col>
                 </Row>
