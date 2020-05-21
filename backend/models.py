@@ -8,7 +8,7 @@ class CheckIn(models.Model):
         related_name='checkins',
         on_delete=models.CASCADE,
     )
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField()
     modified = models.DateTimeField(auto_now=True)
     duration = models.FloatField()
     tag = models.CharField(max_length=64)
