@@ -70,6 +70,7 @@ export default class App extends Component {
             .then(res => res.json())
             .then(data => {
                 localStorage.setItem('token', data.token);
+                if (data['non_field_errors']) throw data['non_field_errors'][0];
                 this.setState({
                     loggedIn: true,
                     username: data.user.username,
@@ -78,6 +79,7 @@ export default class App extends Component {
                     lastName: data.user.last_name,
                 });
             })
+            .catch(err => this.setState({ loginError: true, loginErrorInfo: err }));
     }
 
     handleSignup = (e, data) => {
