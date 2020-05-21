@@ -9,9 +9,15 @@ import {
     MDBCollapse as Collapse,
 } from 'mdbreact';
 import { Image } from 'cloudinary-react';
+import PropTypes from 'prop-types';
 
 
 export default class Navigation extends Component {
+    static propTypes = {
+        handleLogout: PropTypes.func.isRequired,
+        username: PropTypes.string.isRequired,
+    }
+
     constructor(props) {
         super(props);
         this.state = {

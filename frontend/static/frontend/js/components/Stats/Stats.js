@@ -4,18 +4,22 @@ import {
     MDBCardHeader as CardHeader,
     MDBCardBody as CardBody,
     MDBCardFooter as CardFooter,
-    MDBTabPane as TabPane,
-    MDBTabContent as TabContent,
     MDBNav as Nav,
     MDBNavItem as NavItem,
     MDBNavLink as NavLink,
 } from 'mdbreact';
+import dateFormat from 'dateformat';
 import Loading from '../Loading';
 import { Pie } from 'react-chartjs-2';
 import 'chartjs-plugin-colorschemes';
+import PropTypes from 'prop-types';
 
 
 export default class Stats extends Component {
+    static propTypes = {
+        checkIns: PropTypes.array.isRequired,
+    }
+
     constructor(props) {
         super(props);
         this.state = {
@@ -33,7 +37,6 @@ export default class Stats extends Component {
                 responsive: true,
             },
         };
-        this.chartRef = React.createRef();
     }
 
     componentDidMount() {
@@ -48,6 +51,7 @@ export default class Stats extends Component {
         if (sum(Object.values(this.state.stats)) !== sum(Object.values(prevState.stats))
             || this.props.checkIns.length !== prevProps.checkIns.length
             || this.state.statSelector !== prevState.statSelector) {
+            // update barrier to prevent infinite update loop
             this.updateStats(this.props.checkIns);
         }
     }
@@ -57,23 +61,29 @@ export default class Stats extends Component {
         let now = new Date();
 
         function millisToDays(ms) {
+            // ms/s/min/hr/day
             return ms/1000/60/60/24
         }
 
         function condition(select, now, prev) {
+            /* condition selector for information to display on pie chart
+            depending on selected time period */
             if (select === 'all-time') {
                 return true;
             } else if (select === 'month') {
-                return (prev.date.getMonth() === now.getMonth() && prev.date.getFullYear() === now.getFullYear());
+                return (dateFormat(now, 'yyyy-mm') === dateFormat(prev.date, 'yyyy-mm'));
             } else if (select === 'week') {
                 return (millisToDays(now.getTime()) - millisToDays(prev.date.getTime()) <= 7);
             } else if (select === 'day') {
-                return (now.getDay() === prev.date.getDay());
+                return (dateFormat(now, 'yyyy-mm-dd') === dateFormat(prev.date, 'yyyy-mm-dd'));
             }
         }
 
         checkIns.forEach((checkIn, i) => {
             if (condition(this.state.statSelector, now, checkIn)) {
+                /* If tag exists in the stats object, add the corresponding
+                duration. If not, create the tag and initialize it with the
+                duration of the current tag */
                 stats[checkIn.tag] = (stats[checkIn.tag])
                     ? stats[checkIn.tag] + checkIn.duration
                     : checkIn.duration;
@@ -85,6 +95,7 @@ export default class Stats extends Component {
     }
 
     chartUpdate = (stats) => {
+        // trigger chart redraw
         this.setState({
             dataPie: {
                 labels: Object.keys(stats),
@@ -96,6 +107,7 @@ export default class Stats extends Component {
     }
 
     togglePills = (tab) => e => {
+        // pie chart time period selector
         e.preventDefault();
         this.setState({ statSelector: tab });
     }
@@ -109,7 +121,6 @@ export default class Stats extends Component {
                 <CardBody>
                     {(Object.keys(this.state.stats).length > 0)
                         ? <Pie
-                            ref={this.chartRef}
                             data={this.state.dataPie}
                             height={200}
                             options={this.state.options}

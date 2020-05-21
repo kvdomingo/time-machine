@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 
 export default class Signup extends Component {
+    static propTypes = {
+        handleSignup: PropTypes.func.isRequired,
+        loginErrorInfo: PropTypes.string,
+    }
+
     constructor(props) {
         super(props);
         this.state = {

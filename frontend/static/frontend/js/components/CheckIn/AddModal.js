@@ -7,9 +7,25 @@ import {
     MDBIcon as Icon,
     MDBBtn as Button,
 } from 'mdbreact';
+import PropTypes from 'prop-types';
 
 
 export default class AddModal extends Component {
+    static propTypes = {
+        activities: PropTypes.string.isRequired,
+        addCheckIn: PropTypes.func.isRequired,
+        clearForm: PropTypes.func.isRequired,
+        duration: PropTypes.number.isRequired,
+        handleChange: PropTypes.func.isRequired,
+        modalOpen: PropTypes.bool.isRequired,
+        tag: PropTypes.string.isRequired,
+        toggleModal: PropTypes.func.isRequired,
+        validDuration: PropTypes.bool.isRequired,
+        validateDuration: PropTypes.func.isRequired,
+        validTag: PropTypes.bool.isRequired,
+        validateTag: PropTypes.func.isRequired,
+    }
+
     render() {
         return (
             <Modal isOpen={this.props.modalOpen} toggle={this.props.toggleModal}>

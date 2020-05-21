@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import {
-    MDBTypography as Typography,
-} from 'mdbreact';
+import PropTypes from 'prop-types';
 
 
 export default class Login extends Component {
+    static propTypes = {
+        handleLogin: PropTypes.func.isRequired,
+        loginError: PropTypes.bool,
+    }
+
     constructor(props) {
         super(props);
         this.state = {

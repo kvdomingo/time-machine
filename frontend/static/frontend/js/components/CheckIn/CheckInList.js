@@ -5,9 +5,15 @@ import {
     MDBListGroupItem as ListGroupItem,
 } from 'mdbreact';
 import '../App.css';
+import PropTypes from 'prop-types';
 
 
 export default class CheckInList extends Component {
+    static propTypes ={
+        checkIns: PropTypes.array.isRequired,
+        deleteCheckIn: PropTypes.func.isRequired,
+    }
+
     render() {
         return (
             this.props.checkIns.map((checkIn, i) => (

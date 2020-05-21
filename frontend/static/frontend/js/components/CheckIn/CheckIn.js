@@ -16,9 +16,14 @@ import Loading from '../Loading';
 import dateFormat from 'dateformat';
 import Cookies from 'js-cookie';
 import '../App.css'
+import PropTypes from 'prop-types';
 
 
 export default class CheckIn extends Component {
+    static propTypes = {
+        firstName: PropTypes.string.isRequired,
+    }
+
     constructor(props) {
         super(props);
         this.state = {
@@ -62,6 +67,7 @@ export default class CheckIn extends Component {
 
     handleChange = (e) => {
         let { name, value } = e.target;
+        if (name === 'duration') value = parseFloat(value);
         this.setState({ [name]: value });
     }
 
@@ -156,9 +162,7 @@ export default class CheckIn extends Component {
                                     deleteCheckIn={this.deleteCheckIn}
                                     {...this.state}
                                     />
-                                : <ListGroupItem
-                                    className='blue-grey lighten-5 text-center'
-                                    >
+                                : <ListGroupItem className='blue-grey lighten-5 text-center'>
                                     You don't have any check-ins yet. Get started by clicking the button above.
                                 </ListGroupItem>
                             }
