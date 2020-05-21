@@ -1,7 +1,6 @@
 # TimingMachine: A personal time-tracking web app
 ![TimingMachine](https://raw.githubusercontent.com/kvdomingo/time-machine/master/frontend/static/frontend/images/logo.png?token=AI7UNTDK33VD3TYB6TXLDVK6Z3BDE)
 
-
 ## Getting started
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
@@ -48,7 +47,12 @@ A step by step series of examples that tell you how to get a development env run
 > python manage.py runserver
 ```
 
-Access the local server at `http://localhost:8000`.
+Access the local server at `http://localhost:8000`. When making any changes to the code, run the following
+```shell
+> npm run watch
+```
+The Babel transpiler will watch in the background for file changes and automatically compile them.
+
 
 ### Running the tests
 ```shell
