@@ -14,5 +14,5 @@ urlpatterns = [
     path("api/", include("api.urls")),
 ]
 
-if settings.PYTHON_ENV != "production":
+if settings.PYTHON_ENV == "production":
     urlpatterns.append(re_path(r"^.*/?$", lambda r: render(r, "index.html")))
