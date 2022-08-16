@@ -15,7 +15,6 @@ from ..cognito import cognito
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def login(req: Request):
-    logger.info("HELLo")
     data = {k: v[0] for k, v in dict(req.data).items()}
     user, err = cognito.get_user(data["username"])
     if err:
@@ -45,7 +44,7 @@ def login(req: Request):
         refresh,
         httponly=True,
         samesite="Strict",
-        path="/api/auth",
+        path="/api/auth/refresh",
     )
     return res
 

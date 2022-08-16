@@ -53,9 +53,10 @@ function CheckInList() {
     const errors = { ...formErrors };
     (Object.keys(errors) as (keyof CheckInForm)[]).forEach(key => {
       if (key === "duration") {
-        errors.duration = !isNaN(parseFloat(String(newCheckInData.duration)))
-          ? CheckInStatus.OK
-          : CheckInStatus.NumberOnly;
+        errors.duration =
+          !isNaN(parseFloat(String(newCheckInData.duration))) && parseFloat(String(newCheckInData.duration)) > 0
+            ? CheckInStatus.OK
+            : CheckInStatus.NumberOnly;
       } else if (key === "tag") {
         errors.tag =
           newCheckInData.tag.length > 0
@@ -93,13 +94,28 @@ function CheckInList() {
   }
 
   return (
-    <List>
+    <List
+      sx={{
+        "& li": {
+          border: "1px solid #DDD",
+        },
+        "& li:first-child": {
+          borderTopLeftRadius: "10px",
+          borderTopRightRadius: "10px",
+        },
+        "& li:last-child": {
+          borderBottomLeftRadius: "10px",
+          borderBottomRightRadius: "10px",
+        },
+      }}
+    >
       <ListItem>
         {creating ? (
           <form onSubmit={handleCreateCheckIn}>
             <Grid container spacing={1}>
-              <Grid item xs>
+              <Grid item xs={2}>
                 <TextField
+                  autoFocus
                   label="Duration"
                   variant="outlined"
                   InputProps={{ endAdornment: "hrs" }}
@@ -123,7 +139,7 @@ function CheckInList() {
                   helperText={formErrors.tag}
                 />
               </Grid>
-              <Grid item xs={5}>
+              <Grid item xs={4}>
                 <TextField
                   label="Activities"
                   variant="outlined"
@@ -135,7 +151,7 @@ function CheckInList() {
                   helperText={formErrors.activities}
                 />
               </Grid>
-              <Grid item xs={2} container alignItems="center">
+              <Grid item xs={2} container alignItems="center" justifyContent="flex-end">
                 <IconButton
                   onClick={() => {
                     setNewCheckInData({ ...initialCheckIn });
@@ -151,9 +167,11 @@ function CheckInList() {
             </Grid>
           </form>
         ) : (
-          <Button variant="text" color="primary" startIcon={<Add />} onClick={() => setCreating(true)}>
-            Check In
-          </Button>
+          <Grid container justifyContent="center">
+            <Button variant="text" color="primary" startIcon={<Add />} onClick={() => setCreating(true)}>
+              Check In
+            </Button>
+          </Grid>
         )}
       </ListItem>
       {checkIns.length > 0 ? (
@@ -163,7 +181,7 @@ function CheckInList() {
               <Grid item xs>
                 {c.duration} {c.duration === 1 ? "hr" : "hrs"} #{c.tag} {c.activities}
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={2} container justifyContent="flex-end">
                 <IconButton color="error" onClick={() => handleDeleteCheckIn(c.id)}>
                   <Delete />
                 </IconButton>

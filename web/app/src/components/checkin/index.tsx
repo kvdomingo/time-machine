@@ -6,6 +6,7 @@ import api from "../../api";
 import { useDispatch, useSelector } from "../../store/hooks";
 import { selectUser, updateLoggedIn, updateUser } from "../../store/timeSlice";
 import CheckInList from "./CheckInList";
+import Stats from "./Stats";
 
 function CheckInView() {
   const user = useSelector(selectUser);
@@ -40,15 +41,17 @@ function CheckInView() {
               </LoadingButton>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h5">Today is {dateFormat(new Date(), "dddd, d mmmm yyyy")}</Typography>
+              <Typography variant="h6">Today is {dateFormat(new Date(), "dddd, d mmmm yyyy")}</Typography>
             </Grid>
           </Grid>
 
-          <Grid container>
-            <Grid item xs={8}>
+          <Grid container spacing={2} my={2}>
+            <Grid item xs={7}>
               <CheckInList />
             </Grid>
-            <Grid item xs />
+            <Grid item xs>
+              <Stats />
+            </Grid>
           </Grid>
         </Container>
       </Grid>
