@@ -45,12 +45,12 @@ WORKDIR /tmp
 
 COPY poetry.lock pyproject.toml ./
 
-RUN poetry export -f requirements.txt | pip install -r /dev/stdin
+RUN poetry export --without-hashes -f requirements.txt | pip install -r /dev/stdin
 
 WORKDIR /backend
 
-COPY ./playground/ ./playground/
-COPY ./mid/ ./mid/
+COPY ./time_machine/ ./time_machine/
+COPY ./api/ ./api/
 COPY ./*.py ./
 COPY ./*.sh ./
 COPY --from=build /web/build ./web/app/
