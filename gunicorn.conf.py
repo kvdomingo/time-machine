@@ -18,7 +18,7 @@ def when_ready(_):
 
     import django
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "playground.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "time_machine.settings")
     django.setup()
 
     from api.tasks import startup

@@ -32,7 +32,7 @@ services:
     environment:
       - NGINX_HTTP_PORT_NUMBER=${HTTP_PORT}
     volumes:
-      - ./proxy/nginx.conf:/opt/bitnami/nginx/conf/server_blocks/playground.conf:ro
+      - ./proxy/nginx.conf:/opt/bitnami/nginx/conf/server_blocks/time_machine.conf:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.time_machine.rule=Host(`time-machine.localhost`)"
