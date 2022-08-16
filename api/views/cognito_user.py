@@ -8,6 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from ..cognito import cognito, get_users_from_cache, set_users_cache
+from ..models import CognitoUser as DBUser
 from ..schemas import CognitoUser
 
 
@@ -32,6 +33,7 @@ def signup(req: Request):
     err = cognito.set_permanent_password(user, password)
     if err:
         return Response(err.error, status=err.status)
+    DBUser.objects.create(**user)
     if (cached := get_users_from_cache()) is not None:
         cached.append(user)
         set_users_cache(cached)

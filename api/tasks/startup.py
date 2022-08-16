@@ -19,10 +19,8 @@ def sync_cognito_users() -> bool:
         CognitoUser.objects.update_or_create(id=id_, defaults=cognito_user)
     db_users = CognitoUser.objects.all()
     for db_user in db_users:
-        # Mark user as inactive if they have been deleted from the Cognito user pool
         if str(db_user.id) not in [str(u.id) for u in cognito_users]:
-            db_user.is_active = False
-            db_user.save()
+            db_user.delete()
     cache.set("cognito_users", json.dumps([user.dict() for user in cognito_users]), timeout=60 * 5)
     return False
 

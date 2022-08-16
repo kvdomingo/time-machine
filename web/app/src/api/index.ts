@@ -41,6 +41,9 @@ const api = {
     list(): Promise<AxiosResponse<CheckInResponse[]>> {
       return axi.get("/checkin");
     },
+    listAll(): Promise<AxiosResponse<CheckInResponse[]>> {
+      return axi.get("/checkin/admin");
+    },
     get(id: string): Promise<AxiosResponse<CheckInResponse>> {
       return axi.get(`/checkin/${id}`);
     },

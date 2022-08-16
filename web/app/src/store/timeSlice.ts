@@ -12,6 +12,7 @@ interface GlobalNotification {
 
 export interface TimeState {
   checkIns: CheckInResponse[];
+  allCheckIns: CheckInResponse[];
   user: UserResponse | null;
   users: UserResponse[];
   loggedIn: boolean;
@@ -21,6 +22,7 @@ export interface TimeState {
 
 export const initialState: TimeState = {
   checkIns: [],
+  allCheckIns: [],
   user: null,
   users: [],
   loggedIn: false,
@@ -39,6 +41,9 @@ export const timeSlice = createSlice({
     updateCheckIns(state, action: PayloadAction<CheckInResponse[]>) {
       state.checkIns = action.payload;
     },
+    updateAllCheckIns(state, action: PayloadAction<CheckInResponse[]>) {
+      state.allCheckIns = action.payload;
+    },
     updateUser(state, action: PayloadAction<UserResponse | null>) {
       state.user = action.payload;
     },
@@ -54,19 +59,26 @@ export const timeSlice = createSlice({
     updateGlobalNotification(state, action: PayloadAction<GlobalNotification>) {
       state.globalNotification = action.payload;
     },
+    resetTimeMachine(state) {
+      state = { ...initialState };
+    },
   },
 });
 
 export const {
   updateCheckIns,
+  updateAllCheckIns,
   updateUsers,
   updateLoggedIn,
   updateApiRequestLoading,
   updateGlobalNotification,
   updateUser,
+  resetTimeMachine,
 } = timeSlice.actions;
 
 export const selectCheckIns = (state: RootState) => state.time.checkIns;
+
+export const selectAllCheckIns = (state: RootState) => state.time.allCheckIns;
 
 export const selectUser = (state: RootState) => state.time.user;
 

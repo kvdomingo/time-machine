@@ -1,7 +1,9 @@
 import { Suspense, useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import api from "./api";
+import LoggedInView from "./components/LoggedInView";
 import CheckInView from "./components/checkin";
+import AdminView from "./components/checkin/AdminView";
 import Login from "./components/login/Login";
 import FullPageLoading from "./components/shared/FullPageLoading";
 import GlobalNotification from "./components/shared/GlobalNotification";
@@ -36,7 +38,10 @@ function App() {
           {loading ? (
             <Route path="/" element={<FullPageLoading />} />
           ) : loggedIn ? (
-            <Route path="/" element={<CheckInView />} />
+            <Route path="/" element={<LoggedInView />}>
+              <Route path="/" element={<CheckInView />} />
+              <Route path="/allcheckins" element={<AdminView />} />
+            </Route>
           ) : (
             <Route path="/" element={<Login />} />
           )}
