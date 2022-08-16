@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
+import urllib
 from datetime import timedelta
 from pathlib import Path
 
@@ -106,7 +107,13 @@ WSGI_APPLICATION = "time_machine.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {"default": dj_database_url.parse(get_database_connection())}
+if PYTHON_ENV == "production":
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    DATABASE_CONFIG = dj_database_url.parse(DATABASE_URL)
+    DATABASE_CONFIG["HOST"] = urllib.parse.unquote(DATABASE_CONFIG["HOST"])
+    DATABASES = {"default": DATABASE_CONFIG}
+else:
+    DATABASES = {"default": dj_database_url.parse(get_database_connection())}
 
 
 # AWS
