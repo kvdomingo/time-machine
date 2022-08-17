@@ -82,30 +82,22 @@ function AdminView() {
   }, []);
 
   useEffect(() => {
-    setFilteredCheckIns(
-      checkIns.filter(
-        c =>
-          moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment(filters.startDate)) &&
-          moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(moment(filters.endDate)) &&
-          (filters.users.length > 0 ? filters.users.includes(c.author) : true) &&
-          (filters.tags.length > 0 ? filters.tags.includes(c.tag) : true),
-      ),
+    let filtered = checkIns.filter(
+      c =>
+        moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment(filters.startDate)) &&
+        moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(moment(filters.endDate)) &&
+        (filters.users.length > 0 ? filters.users.includes(c.author) : true) &&
+        (filters.tags.length > 0 ? filters.tags.includes(c.tag) : true),
     );
+    setFilteredCheckIns(filtered);
 
     const uniqueUsers = [...new Set(checkIns.map(c => c.author))];
     const summaryRows: SummaryData[] = uniqueUsers
       .map(u => ({
         id: u,
         author: u,
-        timeLogged: checkIns
-          .filter(
-            c =>
-              c.author === u &&
-              moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment(filters.startDate)) &&
-              moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(moment(filters.endDate)) &&
-              (filters.users.length > 0 ? filters.users.includes(c.author) : true) &&
-              (filters.tags.length > 0 ? filters.tags.includes(c.tag) : true),
-          )
+        timeLogged: filtered
+          .filter(c => c.author === u)
           .map(c => c.duration)
           .reduce((acc, val) => acc + val, 0),
       }))
