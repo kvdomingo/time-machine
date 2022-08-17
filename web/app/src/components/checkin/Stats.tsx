@@ -5,6 +5,7 @@ import { CheckInResponse } from "../../api/types/checkIn";
 
 interface StatsProps {
   checkIns: CheckInResponse[];
+  byTag: boolean;
 }
 
 interface Data {
@@ -17,15 +18,15 @@ enum ChartType {
   Bar,
 }
 
-function Stats({ checkIns }: StatsProps) {
+function Stats({ checkIns, byTag }: StatsProps) {
   const [chartSelector, setChartSelector] = useState<ChartType>(ChartType.Pie);
   const [data, setData] = useState<any>({});
 
   useEffect(() => {
-    let uniqueTags = [...new Set(checkIns.map(c => c.tag))];
+    let uniqueTags = byTag ? [...new Set(checkIns.map(c => c.activities))] : [...new Set(checkIns.map(c => c.tag))];
     let stats: Data[] = uniqueTags.map(tag => ({ tag, value: 0 }));
     checkIns.forEach(c => {
-      let indexOfTag = stats.findIndex(s => s.tag === c.tag);
+      let indexOfTag = stats.findIndex(s => s.tag === (byTag ? c.activities : c.tag));
       stats[indexOfTag].value += c.duration;
     });
     stats.sort((a, b) => a.value - b.value);

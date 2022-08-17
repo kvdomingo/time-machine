@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Delete } from "@mui/icons-material";
-import { Grid, IconButton, List, ListItem, Pagination, Typography } from "@mui/material";
+import { Button, Grid, IconButton, List, ListItem, Pagination, Typography } from "@mui/material";
 import api from "../../api";
 import { CheckInResponse } from "../../api/types/checkIn";
 import { useDispatch } from "../../store/hooks";
@@ -9,9 +9,10 @@ import NewCheckIn from "./NewCheckIn";
 
 interface CheckInListProps {
   checkIns: CheckInResponse[];
+  setSelectedTag: (tag: string) => void;
 }
 
-function CheckInList({ checkIns }: CheckInListProps) {
+function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
 
@@ -63,9 +64,9 @@ function CheckInList({ checkIns }: CheckInListProps) {
               <Grid container alignItems="center">
                 <Grid item xs>
                   {c.duration} {c.duration === 1 ? "hr" : "hrs"}{" "}
-                  <Typography color="primary" display="inline">
-                    #{c.tag}
-                  </Typography>{" "}
+                  <Button variant="text" sx={{ textTransform: "none", p: 0 }} onClick={() => setSelectedTag(c.tag)}>
+                    <Typography variant="body1">#{c.tag}</Typography>
+                  </Button>{" "}
                   {c.activities}
                 </Grid>
                 <Grid item xs={2} container justifyContent="flex-end">

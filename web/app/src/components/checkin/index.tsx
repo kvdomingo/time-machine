@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowDropDown } from "@mui/icons-material";
+import { AccessTime, ArrowDropDown, Clear, FilterAlt } from "@mui/icons-material";
 import {
   Button,
   ButtonGroup,
   ClickAwayListener,
   Grid,
   Grow,
+  IconButton,
   MenuItem,
   MenuList,
   Paper,
@@ -49,66 +50,82 @@ function CheckInView() {
   ];
   const checkIns = useSelector(selectCheckIns);
   const [filteredCheckIns, setFilteredCheckIns] = useState(cloneDeep(checkIns));
-  const [openPeriodSelectMenu, setOpenPeriodSelectMenu] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<ViewOption>(viewOptions[1]);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [openPeriodSelectMenu, setOpenPeriodSelectMenu] = useState(false);
   const [customRangeStart, setCustomRangeStart] = useState(moment().startOf("isoWeek"));
   const [customRangeEnd, setCustomRangeEnd] = useState(moment().endOf("day"));
   const periodSelectorRef = useRef<any>(null!);
   const uniqueTags = [...new Set(filteredCheckIns.map(c => c.tag))];
 
   useEffect(() => {
+    let filtered: typeof checkIns;
     switch (selectedPeriod.value) {
       case "day": {
-        setFilteredCheckIns(
-          checkIns.filter(
-            c =>
-              moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("day")) &&
-              moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(moment().endOf("day")),
-          ),
+        filtered = checkIns.filter(
+          c =>
+            moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("day")) &&
+            moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(moment().endOf("day")),
         );
         break;
       }
       case "week": {
-        setFilteredCheckIns(
-          checkIns.filter(c =>
-            moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("isoWeek")),
-          ),
+        filtered = checkIns.filter(c =>
+          moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("isoWeek")),
         );
         break;
       }
       case "month": {
-        setFilteredCheckIns(
-          checkIns.filter(c => moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("month"))),
+        filtered = checkIns.filter(c =>
+          moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("month")),
         );
         break;
       }
       case "custom": {
-        setFilteredCheckIns(
-          checkIns.filter(
-            c =>
-              moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(customRangeStart) &&
-              moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(customRangeEnd),
-          ),
+        filtered = checkIns.filter(
+          c =>
+            moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(customRangeStart) &&
+            moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(customRangeEnd),
         );
         break;
       }
       default: {
-        setFilteredCheckIns(cloneDeep(checkIns));
+        filtered = cloneDeep(checkIns);
+        break;
       }
     }
-  }, [selectedPeriod.value, checkIns, customRangeStart, customRangeEnd]);
+    filtered = filtered.filter(f => (!!selectedTag ? f.tag === selectedTag : true));
+    setFilteredCheckIns(filtered);
+  }, [selectedPeriod.value, checkIns, customRangeStart, customRangeEnd, selectedTag]);
 
   return (
     <Grid container spacing={2} my={2}>
       <Grid item md={7}>
         <Grid container alignItems="center" spacing={1}>
-          <Grid item md>
+          <Grid item md={12}>
             <ButtonGroup variant="text" ref={periodSelectorRef}>
-              <Button onClick={() => setOpenPeriodSelectMenu(open => !open)}>
+              <Button
+                onClick={() => setOpenPeriodSelectMenu(open => !open)}
+                startIcon={<AccessTime />}
+                endIcon={<ArrowDropDown />}
+              >
                 View: {selectedPeriod.label}
-                <ArrowDropDown />
               </Button>
             </ButtonGroup>
+            {!!selectedTag && (
+              <ButtonGroup variant="text">
+                <Button
+                  startIcon={<FilterAlt />}
+                  endIcon={
+                    <IconButton size="small" onClick={() => setSelectedTag(null)}>
+                      <Clear />
+                    </IconButton>
+                  }
+                >
+                  Filter: #{selectedTag}
+                </Button>
+              </ButtonGroup>
+            )}
             <Popper
               open={openPeriodSelectMenu}
               anchorEl={periodSelectorRef.current}
@@ -169,10 +186,13 @@ function CheckInView() {
       </Grid>
       <Grid item md={5} />
       <Grid item md={7}>
-        <CheckInList checkIns={filteredCheckIns} />
+        <CheckInList
+          checkIns={filteredCheckIns}
+          setSelectedTag={tag => setSelectedTag(prevTag => (prevTag === tag ? null : tag))}
+        />
       </Grid>
       <Grid item md={5}>
-        <Stats checkIns={filteredCheckIns} />
+        <Stats checkIns={filteredCheckIns} byTag={!!selectedTag} />
       </Grid>
     </Grid>
   );
