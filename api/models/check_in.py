@@ -7,7 +7,7 @@ from .utils import get_timestamp
 
 class CheckIn(models.Model):
     id = models.UUIDField(default=uuid4, primary_key=True, unique=True, editable=False)
-    created = models.PositiveBigIntegerField(default=get_timestamp, editable=False)
+    created = models.PositiveBigIntegerField(default=get_timestamp)  # should normally be uneditable
     modified = models.PositiveBigIntegerField(default=get_timestamp, editable=False)
     duration = models.FloatField()
     tag = models.CharField(max_length=64)

@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Avatar, Grid, Typography } from "@mui/material";
 import { DataGrid, GridColumns } from "@mui/x-data-grid";
 import dateFormat from "dateformat";
+import moment from "moment";
 import api from "../../api";
 import { useDispatch, useSelector } from "../../store/hooks";
 import { selectAllCheckIns, updateAllCheckIns } from "../../store/timeSlice";
-import { getTimezoneOffsetMillis, millisToDays } from "../../utils/dateTime";
+import { getTimezoneOffsetMillis } from "../../utils/dateTime";
 import Loading from "../shared/Loading";
 import AdminTableToolbar from "./AdminTableToolbar";
 
@@ -58,7 +59,7 @@ function AdminView() {
     },
     {
       field: "timeLogged",
-      headerName: "Time Logged",
+      headerName: "Time logged this week",
       flex: 1,
       renderCell: ({ value }) => (
         <Typography sx={{ fontWeight: value >= 45 ? "bold" : undefined }}>
@@ -67,8 +68,8 @@ function AdminView() {
       ),
     },
   ];
-  const checkInsForTheWeek = checkIns.filter(
-    c => millisToDays(new Date().getTime() - new Date(c.created - getTimezoneOffsetMillis()).getTime()) <= 7,
+  const checkInsForTheWeek = checkIns.filter(c =>
+    moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("isoWeek")),
   );
   const uniqueUsers = [...new Set(checkIns.map(c => c.author))];
   const summaryRows: SummaryData[] = uniqueUsers

@@ -88,7 +88,7 @@ function NewCheckIn({ fetchCheckIns }: NewCheckInProps) {
   return creating ? (
     <form onSubmit={handleCreateCheckIn}>
       <Grid container spacing={1}>
-        <Grid item xs={2}>
+        <Grid item xs={12} md={2}>
           <TextField
             autoFocus
             label="Duration"
@@ -100,9 +100,10 @@ function NewCheckIn({ fetchCheckIns }: NewCheckInProps) {
             onChange={handleChange}
             error={!!formErrors.duration}
             helperText={formErrors.duration}
+            fullWidth
           />
         </Grid>
-        <Grid item xs>
+        <Grid item xs={12} md>
           <TextField
             label="Tag"
             variant="outlined"
@@ -112,9 +113,10 @@ function NewCheckIn({ fetchCheckIns }: NewCheckInProps) {
             onChange={handleChange}
             error={!!formErrors.tag}
             helperText={formErrors.tag}
+            fullWidth
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={12} md={4}>
           <TextField
             label="Activities"
             variant="outlined"
@@ -126,7 +128,7 @@ function NewCheckIn({ fetchCheckIns }: NewCheckInProps) {
             helperText={formErrors.activities}
           />
         </Grid>
-        <Grid item xs={2} container alignItems="center" justifyContent="flex-end">
+        <Grid item xs={12} md={2} container alignItems="center" justifyContent={{ xs: "center", md: "flex-end" }}>
           <IconButton
             onClick={() => {
               setNewCheckInData({ ...initialCheckIn });

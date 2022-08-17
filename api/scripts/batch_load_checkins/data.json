@@ -1,0 +1,602 @@
+[
+  {
+    "created": 1656604800000,
+    "duration": 2,
+    "tag": "reg-radar",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1659801600000,
+    "duration": 6,
+    "tag": "ai-playground",
+    "activities": "implement reset password"
+  },
+  {
+    "created": 1660492800000,
+    "duration": 4,
+    "tag": "search-console",
+    "activities": "migrate to API v2.0"
+  },
+  {
+    "created": 1658592000000,
+    "duration": 5,
+    "tag": "learning",
+    "activities": "google cloud platform"
+  },
+  {
+    "created": 1659283200000,
+    "duration": 1,
+    "tag": "learning",
+    "activities": "django"
+  },
+  {
+    "created": 1657468800000,
+    "duration": 4,
+    "tag": "phoenix-rising",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1658764800000,
+    "duration": 3,
+    "tag": "phoenix-rising",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1659024000000,
+    "duration": 6,
+    "tag": "list-builder",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1660406400000,
+    "duration": 5,
+    "tag": "phoenix-rising",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1658937600000,
+    "duration": 3,
+    "tag": "empower",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1659715200000,
+    "duration": 6,
+    "tag": "gateway-v3",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1658505600000,
+    "duration": 4,
+    "tag": "empower",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1660579200000,
+    "duration": 6,
+    "tag": "link-v2",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1659888000000,
+    "duration": 4,
+    "tag": "empower",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1657728000000,
+    "duration": 3,
+    "tag": "search-console",
+    "activities": "rewrite request proxy"
+  },
+  {
+    "created": 1660665600000,
+    "duration": 6,
+    "tag": "empower",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1659283200000,
+    "duration": 1,
+    "tag": "reg-radar",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1659888000000,
+    "duration": 1,
+    "tag": "ai-playground",
+    "activities": "integrate with API v5.0"
+  },
+  {
+    "created": 1660579200000,
+    "duration": 5,
+    "tag": "reg-radar",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1659369600000,
+    "duration": 3,
+    "tag": "ai-playground",
+    "activities": "implement admin management page"
+  },
+  {
+    "created": 1659110400000,
+    "duration": 6,
+    "tag": "ai-playground",
+    "activities": "fix UI"
+  },
+  {
+    "created": 1658246400000,
+    "duration": 6,
+    "tag": "search-console",
+    "activities": "rewrite request proxy"
+  },
+  {
+    "created": 1659888000000,
+    "duration": 2,
+    "tag": "ai-playground",
+    "activities": "additional form validation"
+  },
+  {
+    "created": 1658419200000,
+    "duration": 5,
+    "tag": "learning",
+    "activities": "react"
+  },
+  {
+    "created": 1659715200000,
+    "duration": 2,
+    "tag": "search-console",
+    "activities": "fix country references"
+  },
+  {
+    "created": 1659715200000,
+    "duration": 3,
+    "tag": "gateway-v3",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1658505600000,
+    "duration": 5,
+    "tag": "list-builder",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1660060800000,
+    "duration": 4,
+    "tag": "gateway-v3",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1660665600000,
+    "duration": 2,
+    "tag": "learning",
+    "activities": "fastapi"
+  },
+  {
+    "created": 1659888000000,
+    "duration": 3,
+    "tag": "link-v2",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1657641600000,
+    "duration": 4,
+    "tag": "empower",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1660406400000,
+    "duration": 3,
+    "tag": "learning",
+    "activities": "docker"
+  },
+  {
+    "created": 1656691200000,
+    "duration": 6,
+    "tag": "learning",
+    "activities": "django"
+  },
+  {
+    "created": 1658160000000,
+    "duration": 6,
+    "tag": "ai-playground",
+    "activities": "fix bug"
+  },
+  {
+    "created": 1656864000000,
+    "duration": 5,
+    "tag": "learning",
+    "activities": "google cloud platform"
+  },
+  {
+    "created": 1658246400000,
+    "duration": 4,
+    "tag": "gateway-v3",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1659974400000,
+    "duration": 2,
+    "tag": "ai-playground",
+    "activities": "implement reset password"
+  },
+  {
+    "created": 1659888000000,
+    "duration": 2,
+    "tag": "learning",
+    "activities": "django"
+  },
+  {
+    "created": 1658592000000,
+    "duration": 6,
+    "tag": "empower",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1658246400000,
+    "duration": 2,
+    "tag": "reg-radar",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1658419200000,
+    "duration": 4,
+    "tag": "search-console",
+    "activities": "fix UI"
+  },
+  {
+    "created": 1658592000000,
+    "duration": 3,
+    "tag": "empower",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1657209600000,
+    "duration": 6,
+    "tag": "link-v2",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1656864000000,
+    "duration": 4,
+    "tag": "learning",
+    "activities": "react"
+  },
+  {
+    "created": 1658505600000,
+    "duration": 6,
+    "tag": "gateway-v3",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1660320000000,
+    "duration": 1,
+    "tag": "ai-playground",
+    "activities": "fix bug"
+  },
+  {
+    "created": 1657728000000,
+    "duration": 1,
+    "tag": "list-builder",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1657987200000,
+    "duration": 4,
+    "tag": "search-console",
+    "activities": "rewrite request proxy"
+  },
+  {
+    "created": 1658246400000,
+    "duration": 5,
+    "tag": "list-builder",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1659369600000,
+    "duration": 3,
+    "tag": "learning",
+    "activities": "fastapi"
+  },
+  {
+    "created": 1660320000000,
+    "duration": 6,
+    "tag": "learning",
+    "activities": "docker"
+  },
+  {
+    "created": 1659369600000,
+    "duration": 5,
+    "tag": "list-builder",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1659715200000,
+    "duration": 2,
+    "tag": "learning",
+    "activities": "django"
+  },
+  {
+    "created": 1659801600000,
+    "duration": 4,
+    "tag": "reg-radar",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1656604800000,
+    "duration": 6,
+    "tag": "list-builder",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1657900800000,
+    "duration": 2,
+    "tag": "phoenix-rising",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1658073600000,
+    "duration": 3,
+    "tag": "list-builder",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1659542400000,
+    "duration": 4,
+    "tag": "search-console",
+    "activities": "implement dynamic fields"
+  },
+  {
+    "created": 1659456000000,
+    "duration": 1,
+    "tag": "gateway-v3",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1659456000000,
+    "duration": 3,
+    "tag": "ai-playground",
+    "activities": "integrate with API v5.0"
+  },
+  {
+    "created": 1660665600000,
+    "duration": 1,
+    "tag": "ai-playground",
+    "activities": "fix UI"
+  },
+  {
+    "created": 1660060800000,
+    "duration": 5,
+    "tag": "link-v2",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1657382400000,
+    "duration": 3,
+    "tag": "ai-playground",
+    "activities": "fix bug"
+  },
+  {
+    "created": 1658160000000,
+    "duration": 1,
+    "tag": "phoenix-rising",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1659715200000,
+    "duration": 4,
+    "tag": "learning",
+    "activities": "google cloud platform"
+  },
+  {
+    "created": 1657036800000,
+    "duration": 1,
+    "tag": "ai-playground",
+    "activities": "implement admin management page"
+  },
+  {
+    "created": 1659974400000,
+    "duration": 4,
+    "tag": "gateway-v3",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1657296000000,
+    "duration": 3,
+    "tag": "gateway-v3",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1657641600000,
+    "duration": 2,
+    "tag": "reg-radar",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1660492800000,
+    "duration": 5,
+    "tag": "list-builder",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1659369600000,
+    "duration": 3,
+    "tag": "search-console",
+    "activities": "implement company view"
+  },
+  {
+    "created": 1659369600000,
+    "duration": 4,
+    "tag": "link-v2",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1658160000000,
+    "duration": 5,
+    "tag": "reg-radar",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1659628800000,
+    "duration": 6,
+    "tag": "reg-radar",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1659024000000,
+    "duration": 4,
+    "tag": "reg-radar",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1660579200000,
+    "duration": 4,
+    "tag": "ai-playground",
+    "activities": "implement login system"
+  },
+  {
+    "created": 1658764800000,
+    "duration": 3,
+    "tag": "phoenix-rising",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1659456000000,
+    "duration": 1,
+    "tag": "learning",
+    "activities": "react"
+  },
+  {
+    "created": 1660060800000,
+    "duration": 5,
+    "tag": "empower",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1658678400000,
+    "duration": 4,
+    "tag": "search-console",
+    "activities": "rewrite request proxy"
+  },
+  {
+    "created": 1657728000000,
+    "duration": 5,
+    "tag": "list-builder",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1657036800000,
+    "duration": 5,
+    "tag": "gateway-v3",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1658764800000,
+    "duration": 6,
+    "tag": "search-console",
+    "activities": "fix UI"
+  },
+  {
+    "created": 1659456000000,
+    "duration": 2,
+    "tag": "search-console",
+    "activities": "rewrite request proxy"
+  },
+  {
+    "created": 1658764800000,
+    "duration": 6,
+    "tag": "link-v2",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1659542400000,
+    "duration": 2,
+    "tag": "learning",
+    "activities": "google cloud platform"
+  },
+  {
+    "created": 1657382400000,
+    "duration": 2,
+    "tag": "search-console",
+    "activities": "fix UI"
+  },
+  {
+    "created": 1660320000000,
+    "duration": 4,
+    "tag": "empower",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1659024000000,
+    "duration": 3,
+    "tag": "link-v2",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1657036800000,
+    "duration": 4,
+    "tag": "ai-playground",
+    "activities": "integrate with API v5.0"
+  },
+  {
+    "created": 1660060800000,
+    "duration": 6,
+    "tag": "ai-playground",
+    "activities": "additional form validation"
+  },
+  {
+    "created": 1659888000000,
+    "duration": 1,
+    "tag": "list-builder",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1660147200000,
+    "duration": 2,
+    "tag": "ai-playground",
+    "activities": "additional form validation"
+  },
+  {
+    "created": 1659715200000,
+    "duration": 5,
+    "tag": "link-v2",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1660579200000,
+    "duration": 6,
+    "tag": "search-console",
+    "activities": "fix UI"
+  },
+  {
+    "created": 1660579200000,
+    "duration": 6,
+    "tag": "reg-radar",
+    "activities": "coding backend"
+  },
+  {
+    "created": 1658332800000,
+    "duration": 3,
+    "tag": "learning",
+    "activities": "react"
+  },
+  {
+    "created": 1659542400000,
+    "duration": 6,
+    "tag": "link-v2",
+    "activities": "coding frontend"
+  },
+  {
+    "created": 1659110400000,
+    "duration": 1,
+    "tag": "gateway-v3",
+    "activities": "setup infra"
+  },
+  {
+    "created": 1658505600000,
+    "duration": 3,
+    "tag": "empower",
+    "activities": "coding backend"
+  }
+]

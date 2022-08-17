@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Delete } from "@mui/icons-material";
 import { Button, Grid, IconButton, List, ListItem, Pagination, Typography } from "@mui/material";
+import moment from "moment";
 import api from "../../api";
 import { CheckInResponse } from "../../api/types/checkIn";
 import { useDispatch } from "../../store/hooks";
 import { updateCheckIns } from "../../store/timeSlice";
+import { getTimezoneOffsetMillis } from "../../utils/dateTime";
 import NewCheckIn from "./NewCheckIn";
 
 interface CheckInListProps {
@@ -62,15 +64,26 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
           checkIns.slice((page - 1) * 10, (page - 1) * 10 + 10).map(c => (
             <ListItem key={c.id}>
               <Grid container alignItems="center">
-                <Grid item xs>
-                  {c.duration} {c.duration === 1 ? "hr" : "hrs"}{" "}
-                  <Button variant="text" sx={{ textTransform: "none", p: 0 }} onClick={() => setSelectedTag(c.tag)}>
+                <Grid item xs={12} md={1}>
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                    {moment(c.created - getTimezoneOffsetMillis()).format("MM/DD")}
+                  </Typography>
+                </Grid>
+                <Grid item xs md container alignItems="center">
+                  <Typography variant="body1">
+                    {c.duration} {c.duration === 1 ? "hr" : "hrs"}{" "}
+                  </Typography>
+                  <Button
+                    variant="text"
+                    sx={{ textTransform: "none", py: 0, px: 1 }}
+                    onClick={() => setSelectedTag(c.tag)}
+                  >
                     <Typography variant="body1">#{c.tag}</Typography>
                   </Button>{" "}
-                  {c.activities}
+                  <Typography variant="body1">{c.activities}</Typography>
                 </Grid>
-                <Grid item xs={2} container justifyContent="flex-end">
-                  <IconButton color="error" onClick={() => handleDeleteCheckIn(c.id)}>
+                <Grid item xs={2} md={2} container justifyContent={{ md: "flex-end" }}>
+                  <IconButton color="error" onClick={() => handleDeleteCheckIn(c.id)} size="small">
                     <Delete />
                   </IconButton>
                 </Grid>

@@ -56,7 +56,6 @@ function CheckInView() {
   const [customRangeStart, setCustomRangeStart] = useState(moment().startOf("isoWeek"));
   const [customRangeEnd, setCustomRangeEnd] = useState(moment().endOf("day"));
   const periodSelectorRef = useRef<any>(null!);
-  const uniqueTags = [...new Set(filteredCheckIns.map(c => c.tag))];
 
   useEffect(() => {
     let filtered: typeof checkIns;

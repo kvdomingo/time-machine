@@ -21,9 +21,9 @@ enum ChartType {
 function Stats({ checkIns, byTag }: StatsProps) {
   const [chartSelector, setChartSelector] = useState<ChartType>(ChartType.Pie);
   const [data, setData] = useState<any>({});
+  const uniqueTags = byTag ? [...new Set(checkIns.map(c => c.activities))] : [...new Set(checkIns.map(c => c.tag))];
 
   useEffect(() => {
-    let uniqueTags = byTag ? [...new Set(checkIns.map(c => c.activities))] : [...new Set(checkIns.map(c => c.tag))];
     let stats: Data[] = uniqueTags.map(tag => ({ tag, value: 0 }));
     checkIns.forEach(c => {
       let indexOfTag = stats.findIndex(s => s.tag === (byTag ? c.activities : c.tag));
@@ -37,6 +37,7 @@ function Stats({ checkIns, byTag }: StatsProps) {
           labels: stats.map(s => s.tag),
           values: stats.map(s => s.value),
           type: "pie",
+          textinfo: "value+percent",
         });
         break;
       }
@@ -58,11 +59,13 @@ function Stats({ checkIns, byTag }: StatsProps) {
 
   return (
     <Paper elevation={2} sx={{ p: 2 }}>
-      <Tabs value={chartSelector} onChange={(e, newValue) => setChartSelector(newValue)}>
-        <Tab label="pie" />
-        <Tab label="bar" />
-      </Tabs>
-      <Grid container justifyContent="center" sx={{ overflow: "scroll" }}>
+      <Grid container justifyContent="center">
+        <Tabs value={chartSelector} onChange={(e, newValue) => setChartSelector(newValue)}>
+          <Tab label="pie" />
+          <Tab label="bar" />
+        </Tabs>
+      </Grid>
+      <Grid container mt={2} justifyContent="center" sx={{ overflow: "scroll" }}>
         {checkIns.length === 0 ? (
           "No check ins within the selected period"
         ) : (
