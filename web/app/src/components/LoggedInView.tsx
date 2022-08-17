@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
-import { Button, Container, Grid, Typography } from "@mui/material";
+import { Box, Button, Container, Grid, Typography } from "@mui/material";
 import dateFormat from "dateformat";
 import api from "../api";
 import { useDispatch, useSelector } from "../store/hooks";
@@ -29,21 +29,23 @@ function LoggedInView() {
       <Container maxWidth="lg">
         <Grid container>
           <Grid item xs>
-            <Typography variant="h3">Time Machine</Typography>
+            <Box component={Link} to="/" sx={{ textDecoration: "none", color: "text.primary" }}>
+              <Typography variant="h3">Time Machine</Typography>
+            </Box>
           </Grid>
           <Grid item xs container justifyContent="flex-end">
             <Button color="inherit" disabled>
               {user?.username}
             </Button>
             {user?.is_admin && (
-              <Button
-                color="inherit"
-                variant="text"
-                component={Link}
-                to={location.pathname === "/allcheckins" ? "/" : "/allcheckins"}
-              >
-                {location.pathname === "/allcheckins" ? "Exit Admin View" : "Admin View"}
-              </Button>
+              <>
+                <Button color="inherit" variant="text" component={Link} to="/allcheckins">
+                  Admin View
+                </Button>
+                <Button color="inherit" variant="text" component={Link} to="/users">
+                  User Management
+                </Button>
+              </>
             )}
             <LoadingButton loading={loading} color="inherit" variant="text" onClick={handleLogout}>
               Logout

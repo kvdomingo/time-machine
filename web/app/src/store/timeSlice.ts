@@ -1,5 +1,6 @@
 import { AlertColor } from "@mui/material";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { cloneDeep } from "lodash-es";
 import moment from "moment/moment";
 import { UserResponse } from "../api/types/auth";
 import { CheckInResponse } from "../api/types/checkIn";
@@ -22,6 +23,7 @@ export interface TimeState {
   checkIns: CheckInResponse[];
   allCheckIns: CheckInResponse[];
   user: UserResponse | null;
+  allUsers: UserResponse[];
   loggedIn: boolean;
   apiRequestLoading: boolean;
   globalNotification: GlobalNotification;
@@ -32,6 +34,7 @@ export const initialState: TimeState = {
   checkIns: [],
   allCheckIns: [],
   user: null,
+  allUsers: [],
   loggedIn: false,
   apiRequestLoading: false,
   globalNotification: {
@@ -49,7 +52,7 @@ export const initialState: TimeState = {
 
 export const timeSlice = createSlice({
   name: "time",
-  initialState,
+  initialState: cloneDeep(initialState),
   reducers: {
     updateCheckIns(state, action: PayloadAction<CheckInResponse[]>) {
       state.checkIns = action.payload;
@@ -59,6 +62,9 @@ export const timeSlice = createSlice({
     },
     updateUser(state, action: PayloadAction<UserResponse | null>) {
       state.user = action.payload;
+    },
+    updateAllUsers(state, action: PayloadAction<UserResponse[]>) {
+      state.allUsers = action.payload;
     },
     updateLoggedIn(state, action: PayloadAction<boolean>) {
       state.loggedIn = action.payload;
@@ -73,7 +79,7 @@ export const timeSlice = createSlice({
       state.adminViewFilters = action.payload;
     },
     resetTimeMachine(state) {
-      state = { ...initialState };
+      Object.assign(state, cloneDeep(initialState));
     },
   },
 });
@@ -85,6 +91,7 @@ export const {
   updateApiRequestLoading,
   updateGlobalNotification,
   updateUser,
+  updateAllUsers,
   updateAdminViewFilters,
   resetTimeMachine,
 } = timeSlice.actions;
@@ -94,6 +101,8 @@ export const selectCheckIns = (state: RootState) => state.time.checkIns;
 export const selectAllCheckIns = (state: RootState) => state.time.allCheckIns;
 
 export const selectUser = (state: RootState) => state.time.user;
+
+export const selectAllUsers = (state: RootState) => state.time.allUsers;
 
 export const selectLoggedIn = (state: RootState) => state.time.loggedIn;
 

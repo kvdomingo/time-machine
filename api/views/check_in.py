@@ -1,10 +1,11 @@
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from ..models import CheckIn
+from ..permissions import IsAdmin
 from ..serializers import CheckInSerializer, CheckInWithUsernamesSerializer
 
 
@@ -35,10 +36,8 @@ class CheckInViewSet(ModelViewSet):
 
 
 @api_view()
-def admin_list_checkins(request: Request):
-    user = request.session["user"]
-    if not user["is_admin"]:
-        return Response(status=status.HTTP_403_FORBIDDEN)
+@permission_classes([IsAdmin])
+def admin_list_checkins(_):
     queryset = CheckIn.objects.all()
     serializer = CheckInWithUsernamesSerializer(queryset, many=True)
     return Response(serializer.data)

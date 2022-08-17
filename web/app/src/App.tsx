@@ -7,6 +7,7 @@ import AdminView from "./components/checkin/AdminView";
 import Login from "./components/login/Login";
 import FullPageLoading from "./components/shared/FullPageLoading";
 import GlobalNotification from "./components/shared/GlobalNotification";
+import UserManagement from "./components/userManagement";
 import { useDispatch, useSelector } from "./store/hooks";
 import { selectLoggedIn, updateLoggedIn, updateUser } from "./store/timeSlice";
 
@@ -41,6 +42,7 @@ function App() {
             <Route path="/" element={<LoggedInView />}>
               <Route path="/" element={<CheckInView />} />
               <Route path="/allcheckins" element={<AdminView />} />
+              <Route path="/users" element={<UserManagement />} />
             </Route>
           ) : (
             <Route path="/" element={<Login />} />

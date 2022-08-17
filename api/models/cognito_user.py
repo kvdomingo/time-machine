@@ -16,6 +16,7 @@ class CognitoUser(models.Model):
 
     class Meta:
         unique_together = ["username", "email"]
+        ordering = ["username"]
 
     def save(self, *args, **kwargs):
         self.updated = get_timestamp()

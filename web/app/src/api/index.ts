@@ -57,6 +57,14 @@ const api = {
       return axi.delete(`/checkin/${id}`);
     },
   },
+  user: {
+    list(): Promise<AxiosResponse<UserResponse[]>> {
+      return axi.get("/users");
+    },
+    updateIsAdmin(username: string, body: { is_admin: boolean }): Promise<AxiosResponse> {
+      return axi.patch(`/user/${username}`, body);
+    },
+  },
 };
 
 export default api;

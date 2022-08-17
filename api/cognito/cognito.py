@@ -265,6 +265,14 @@ class CognitoHandler:
                 Username=username,
                 GroupName="NonAdmin",
             )
+            if (cached := get_users_from_cache()) is not None:
+                try:
+                    u_idx = next(i for i, c in enumerate(cached) if c.username == username)
+                except StopIteration:
+                    pass
+                else:
+                    cached[u_idx].is_admin = True
+                    set_users_cache(cached)
             return None, None
         except Exception as e:
             logger.error(str(e))
@@ -282,6 +290,14 @@ class CognitoHandler:
                 Username=username,
                 GroupName="Admin",
             )
+            if (cached := get_users_from_cache()) is not None:
+                try:
+                    u_idx = next(i for i, c in enumerate(cached) if c.username == username)
+                except StopIteration:
+                    pass
+                else:
+                    cached[u_idx].is_admin = False
+                    set_users_cache(cached)
             return None, None
         except Exception as e:
             logger.error(str(e))
