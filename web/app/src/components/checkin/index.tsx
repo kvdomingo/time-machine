@@ -168,7 +168,6 @@ function CheckInView() {
                   value={customRangeStart}
                   renderInput={params => <TextField {...params} fullWidth label="Start date" />}
                   disableFuture
-                  maxDate={customRangeEnd}
                 />
               </Grid>
               <Grid item md>
@@ -176,7 +175,6 @@ function CheckInView() {
                   onChange={value => setCustomRangeEnd(value!.endOf("day"))}
                   value={customRangeEnd}
                   renderInput={params => <TextField {...params} fullWidth label="End date" />}
-                  minDate={customRangeStart}
                 />
               </Grid>
             </>

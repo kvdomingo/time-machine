@@ -1,5 +1,6 @@
 import { AlertColor } from "@mui/material";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import moment from "moment/moment";
 import { UserResponse } from "../api/types/auth";
 import { CheckInResponse } from "../api/types/checkIn";
 import { RootState } from "./store";
@@ -10,27 +11,39 @@ interface GlobalNotification {
   message: string;
 }
 
+interface AdminFilters {
+  users: string[];
+  tags: string[];
+  startDate: number;
+  endDate: number;
+}
+
 export interface TimeState {
   checkIns: CheckInResponse[];
   allCheckIns: CheckInResponse[];
   user: UserResponse | null;
-  users: UserResponse[];
   loggedIn: boolean;
   apiRequestLoading: boolean;
   globalNotification: GlobalNotification;
+  adminViewFilters: AdminFilters;
 }
 
 export const initialState: TimeState = {
   checkIns: [],
   allCheckIns: [],
   user: null,
-  users: [],
   loggedIn: false,
   apiRequestLoading: false,
   globalNotification: {
     type: "info",
     visible: false,
     message: "",
+  },
+  adminViewFilters: {
+    startDate: moment().startOf("isoWeek").valueOf(),
+    endDate: moment().endOf("day").valueOf(),
+    tags: [],
+    users: [],
   },
 };
 
@@ -47,9 +60,6 @@ export const timeSlice = createSlice({
     updateUser(state, action: PayloadAction<UserResponse | null>) {
       state.user = action.payload;
     },
-    updateUsers(state, action: PayloadAction<UserResponse[]>) {
-      state.users = action.payload;
-    },
     updateLoggedIn(state, action: PayloadAction<boolean>) {
       state.loggedIn = action.payload;
     },
@@ -58,6 +68,9 @@ export const timeSlice = createSlice({
     },
     updateGlobalNotification(state, action: PayloadAction<GlobalNotification>) {
       state.globalNotification = action.payload;
+    },
+    updateAdminViewFilters(state, action: PayloadAction<AdminFilters>) {
+      state.adminViewFilters = action.payload;
     },
     resetTimeMachine(state) {
       state = { ...initialState };
@@ -68,11 +81,11 @@ export const timeSlice = createSlice({
 export const {
   updateCheckIns,
   updateAllCheckIns,
-  updateUsers,
   updateLoggedIn,
   updateApiRequestLoading,
   updateGlobalNotification,
   updateUser,
+  updateAdminViewFilters,
   resetTimeMachine,
 } = timeSlice.actions;
 
@@ -82,12 +95,12 @@ export const selectAllCheckIns = (state: RootState) => state.time.allCheckIns;
 
 export const selectUser = (state: RootState) => state.time.user;
 
-export const selectUsers = (state: RootState) => state.time.users;
-
 export const selectLoggedIn = (state: RootState) => state.time.loggedIn;
 
 export const selectApiRequestLoading = (state: RootState) => state.time.apiRequestLoading;
 
 export const selectGlobalNotification = (state: RootState) => state.time.globalNotification;
+
+export const selectAdminViewFilters = (state: RootState) => state.time.adminViewFilters;
 
 export default timeSlice.reducer;

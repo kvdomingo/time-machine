@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { Avatar, Grid, Typography } from "@mui/material";
 import { DataGrid, GridColumns } from "@mui/x-data-grid";
 import dateFormat from "dateformat";
+import { cloneDeep } from "lodash-es";
 import moment from "moment";
 import api from "../../api";
 import { useDispatch, useSelector } from "../../store/hooks";
-import { selectAllCheckIns, updateAllCheckIns } from "../../store/timeSlice";
+import { selectAdminViewFilters, selectAllCheckIns, updateAllCheckIns } from "../../store/timeSlice";
 import { getTimezoneOffsetMillis } from "../../utils/dateTime";
 import Loading from "../shared/Loading";
-import AdminTableToolbar from "./AdminTableToolbar";
+import AdminTableToolbar from "./adminTableToolbar/AdminTableToolbar";
 
 interface SummaryData {
   author: string;
@@ -16,8 +17,11 @@ interface SummaryData {
 }
 
 function AdminView() {
-  const checkIns = useSelector(selectAllCheckIns);
   const dispatch = useDispatch();
+  const checkIns = useSelector(selectAllCheckIns);
+  const filters = useSelector(selectAdminViewFilters);
+  const [filteredCheckIns, setFilteredCheckIns] = useState<typeof checkIns>(cloneDeep(checkIns));
+  const [summaryCheckins, setSummaryCheckIns] = useState<SummaryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(false);
   const columns: GridColumns = [
@@ -59,7 +63,7 @@ function AdminView() {
     },
     {
       field: "timeLogged",
-      headerName: "Time logged this week",
+      headerName: "Time Logged",
       flex: 1,
       renderCell: ({ value }) => (
         <Typography sx={{ fontWeight: value >= 45 ? "bold" : undefined }}>
@@ -68,20 +72,6 @@ function AdminView() {
       ),
     },
   ];
-  const checkInsForTheWeek = checkIns.filter(c =>
-    moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("isoWeek")),
-  );
-  const uniqueUsers = [...new Set(checkIns.map(c => c.author))];
-  const summaryRows: SummaryData[] = uniqueUsers
-    .map(u => ({
-      id: u,
-      author: u,
-      timeLogged: checkInsForTheWeek
-        .filter(c => c.author === u)
-        .map(c => c.duration)
-        .reduce((acc, val) => acc + val, 0),
-    }))
-    .sort((a, b) => a.author.localeCompare(b.author));
 
   useEffect(() => {
     api.checkin
@@ -91,6 +81,38 @@ function AdminView() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    setFilteredCheckIns(
+      checkIns.filter(
+        c =>
+          moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment(filters.startDate)) &&
+          moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(moment(filters.endDate)) &&
+          (filters.users.length > 0 ? filters.users.includes(c.author) : true) &&
+          (filters.tags.length > 0 ? filters.tags.includes(c.tag) : true),
+      ),
+    );
+
+    const uniqueUsers = [...new Set(checkIns.map(c => c.author))];
+    const summaryRows: SummaryData[] = uniqueUsers
+      .map(u => ({
+        id: u,
+        author: u,
+        timeLogged: checkIns
+          .filter(
+            c =>
+              c.author === u &&
+              moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment(filters.startDate)) &&
+              moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(moment(filters.endDate)) &&
+              (filters.users.length > 0 ? filters.users.includes(c.author) : true) &&
+              (filters.tags.length > 0 ? filters.tags.includes(c.tag) : true),
+          )
+          .map(c => c.duration)
+          .reduce((acc, val) => acc + val, 0),
+      }))
+      .sort((a, b) => a.author.localeCompare(b.author));
+    setSummaryCheckIns(summaryRows);
+  }, [filters, checkIns]);
+
   return (
     <Grid container my={2} alignItems="center" justifyContent="center" sx={{ height: "80vh" }}>
       {loading ? (
@@ -98,11 +120,13 @@ function AdminView() {
       ) : (
         <DataGrid
           columns={summary ? summaryColumns : columns}
-          rows={summary ? summaryRows : checkIns}
+          rows={summary ? summaryCheckins : filteredCheckIns}
           rowsPerPageOptions={[]}
           autoPageSize
           disableSelectionOnClick
-          components={{ Toolbar: () => <AdminTableToolbar summary={summary} setSummary={setSummary} /> }}
+          components={{
+            Toolbar: () => <AdminTableToolbar summary={summary} setSummary={setSummary} />,
+          }}
         />
       )}
     </Grid>
