@@ -35,7 +35,16 @@ function NewCheckIn({ fetchCheckIns, exitCreating }: NewCheckInProps) {
     const { name, value } = e.target;
     setNewCheckInData(form => ({
       ...form,
-      [name]: name === "duration" ? (value.endsWith(".") ? parseFloat(`${value}5`) : parseFloat(value)) : value,
+      [name]:
+        name === "duration"
+          ? !value || isNaN(value)
+            ? 0.0
+            : value.endsWith(".")
+            ? parseFloat(`${value}5`)
+            : parseFloat(value)
+          : name === "tag"
+          ? value.replace(/\s+/g, "-")
+          : value,
     }));
   }
 

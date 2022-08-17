@@ -3,6 +3,8 @@ import ReactDOM from "react-dom/client";
 import { CookiesProvider } from "react-cookie";
 import { Provider } from "react-redux";
 import { ThemeProvider } from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import App from "./App";
 import { AxiosInterceptorProvider } from "./api";
 import "./index.css";
@@ -11,13 +13,16 @@ import { store } from "./store/store";
 import theme from "./themes";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
+
 root.render(
   <React.StrictMode>
     <CookiesProvider>
       <Provider store={store}>
         <AxiosInterceptorProvider>
           <ThemeProvider theme={theme}>
-            <App />
+            <LocalizationProvider dateAdapter={AdapterMoment}>
+              <App />
+            </LocalizationProvider>
           </ThemeProvider>
         </AxiosInterceptorProvider>
       </Provider>

@@ -5,6 +5,12 @@ from ..models import CheckIn
 
 
 class CheckInSerializer(ModelSerializer):
+    class Meta:
+        model = CheckIn
+        fields = "__all__"
+
+
+class CheckInWithUsernamesSerializer(ModelSerializer):
     author = SerializerMethodField()
 
     class Meta:

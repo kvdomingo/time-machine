@@ -8,8 +8,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from ..cognito import cognito, get_users_from_cache, set_users_cache
-from ..models import CognitoUser as DBUser
-from ..schemas import CognitoUser
+from ..models import CognitoUser
+from ..schemas import CognitoUser as CognitoUserSchema
 
 
 @api_view(["POST"])
@@ -17,7 +17,7 @@ from ..schemas import CognitoUser
 def signup(req: Request):
     data = {k: v[0] for k, v in dict(req.data).items()}
     try:
-        user = CognitoUser(**data)
+        user = CognitoUserSchema(**data)
         if not data.get("password"):
             raise ValidationError
     except ValidationError as e:
@@ -33,7 +33,7 @@ def signup(req: Request):
     err = cognito.set_permanent_password(user, password)
     if err:
         return Response(err.error, status=err.status)
-    DBUser.objects.create(**user)
+    CognitoUser.objects.create(**user.dict())
     if (cached := get_users_from_cache()) is not None:
         cached.append(user)
         set_users_cache(cached)

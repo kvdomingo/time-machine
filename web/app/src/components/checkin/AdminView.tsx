@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Avatar, Grid } from "@mui/material";
+import { Avatar, Grid, Typography } from "@mui/material";
 import { DataGrid, GridColumns } from "@mui/x-data-grid";
 import dateFormat from "dateformat";
 import api from "../../api";
@@ -49,10 +49,10 @@ function AdminView() {
       field: "author",
       headerName: "User",
       flex: 1,
-      renderCell: ({ value }) => (
+      renderCell: ({ value, row }) => (
         <Grid container alignItems="center">
           <Avatar sx={{ mr: 1 }}>{value[0].toUpperCase()}</Avatar>
-          {value}
+          <Typography sx={{ fontWeight: row.timeLogged >= 45 ? "bold" : undefined }}>{value}</Typography>
         </Grid>
       ),
     },
@@ -60,7 +60,11 @@ function AdminView() {
       field: "timeLogged",
       headerName: "Time Logged",
       flex: 1,
-      valueFormatter: ({ value }) => `${value} ${value === 1 ? "hr" : "hrs"}`,
+      renderCell: ({ value }) => (
+        <Typography sx={{ fontWeight: value >= 45 ? "bold" : undefined }}>
+          {value} {value === 1 ? "hr" : "hrs"}
+        </Typography>
+      ),
     },
   ];
   const checkInsForTheWeek = checkIns.filter(

@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from ..models import CheckIn
-from ..serializers import CheckInSerializer
+from ..serializers import CheckInSerializer, CheckInWithUsernamesSerializer
 
 
 class CheckInViewSet(ModelViewSet):
@@ -40,5 +40,5 @@ def admin_list_checkins(request: Request):
     if not user["is_admin"]:
         return Response(status=status.HTTP_403_FORBIDDEN)
     queryset = CheckIn.objects.all()
-    serializer = CheckInSerializer(queryset, many=True)
+    serializer = CheckInWithUsernamesSerializer(queryset, many=True)
     return Response(serializer.data)

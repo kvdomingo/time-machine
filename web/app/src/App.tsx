@@ -36,7 +36,7 @@ function App() {
       <Suspense fallback={<FullPageLoading />}>
         <Routes>
           {loading ? (
-            <Route path="/" element={<FullPageLoading />} />
+            <Route path="" element={<FullPageLoading />} />
           ) : loggedIn ? (
             <Route path="/" element={<LoggedInView />}>
               <Route path="/" element={<CheckInView />} />

@@ -19,7 +19,7 @@ function AdminTableToolbar({ summary, setSummary }: AdminTableToolbarProps) {
             <FormControlLabel
               value={summary}
               control={<Switch checked={summary} onChange={e => setSummary(e.target.checked)} />}
-              label="Summary view"
+              label="View total hours"
             />
           </FormControl>
         </Grid>

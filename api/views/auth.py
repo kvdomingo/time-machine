@@ -44,7 +44,7 @@ def login(req: Request):
         refresh,
         httponly=True,
         samesite="Strict",
-        path="/api/auth/refresh",
+        path="/api/auth",
     )
     return res
 

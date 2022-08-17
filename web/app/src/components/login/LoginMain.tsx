@@ -53,6 +53,9 @@ function LoginMain() {
       })
       .catch(err => {
         console.error(err.message);
+        if (err.response.status === 424) {
+          setFormErrors(form => ({ ...form, password: LoginState.IncorrectCredentials }));
+        }
       })
       .finally(() => setLoading(false));
   }
