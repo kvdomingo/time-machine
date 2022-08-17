@@ -29,9 +29,12 @@ function LoggedInView() {
       <Container maxWidth="lg">
         <Grid container>
           <Grid item xs>
-            <Typography variant="h4">Welcome, {user?.username}!</Typography>
+            <Typography variant="h3">Time Machine</Typography>
           </Grid>
           <Grid item xs container justifyContent="flex-end">
+            <Button color="inherit" disabled>
+              {user?.username}
+            </Button>
             {user?.is_admin && (
               <Button
                 color="inherit"
@@ -47,7 +50,7 @@ function LoggedInView() {
             </LoadingButton>
           </Grid>
           <Grid item xs={12}>
-            <Typography variant="h6">Today is {dateFormat(new Date(), "dddd, d mmmm yyyy")}</Typography>
+            <Typography variant="h6">{dateFormat(new Date(), "dddd, d mmmm yyyy")}</Typography>
           </Grid>
         </Grid>
 

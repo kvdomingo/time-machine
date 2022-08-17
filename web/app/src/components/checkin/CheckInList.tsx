@@ -1,21 +1,27 @@
 import { useEffect, useState } from "react";
-import { Add, Delete } from "@mui/icons-material";
-import { Button, Grid, IconButton, List, ListItem } from "@mui/material";
-import dateFormat from "dateformat";
+import { Delete } from "@mui/icons-material";
+import { Grid, IconButton, List, ListItem, Pagination, Typography } from "@mui/material";
 import api from "../../api";
-import { useDispatch, useSelector } from "../../store/hooks";
-import { selectCheckIns, updateCheckIns } from "../../store/timeSlice";
-import { getTimezoneOffsetMillis } from "../../utils/dateTime";
+import { CheckInResponse } from "../../api/types/checkIn";
+import { useDispatch } from "../../store/hooks";
+import { updateCheckIns } from "../../store/timeSlice";
 import NewCheckIn from "./NewCheckIn";
 
-function CheckInList() {
-  const checkIns = useSelector(selectCheckIns);
+interface CheckInListProps {
+  checkIns: CheckInResponse[];
+}
+
+function CheckInList({ checkIns }: CheckInListProps) {
   const dispatch = useDispatch();
-  const [creating, setCreating] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     fetchCheckIns();
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [checkIns]);
 
   function fetchCheckIns() {
     api.checkin
@@ -32,44 +38,35 @@ function CheckInList() {
   }
 
   return (
-    <List
-      sx={{
-        "& li": {
-          border: "1px solid #DDD",
-        },
-        "& li:first-child": {
-          borderTopLeftRadius: "10px",
-          borderTopRightRadius: "10px",
-        },
-        "& li:last-child": {
-          borderBottomLeftRadius: "10px",
-          borderBottomRightRadius: "10px",
-        },
-      }}
-    >
-      <ListItem>
-        {creating ? (
-          <NewCheckIn fetchCheckIns={fetchCheckIns} exitCreating={() => setCreating(false)} />
-        ) : (
-          <Grid container justifyContent="center">
-            <Button variant="text" color="primary" startIcon={<Add />} onClick={() => setCreating(true)}>
-              Check In
-            </Button>
-          </Grid>
-        )}
-      </ListItem>
-      {checkIns.length > 0 ? (
-        checkIns
-          .filter(
-            c =>
-              dateFormat(new Date(), "yyyy-mm-dd") ===
-              dateFormat(new Date(c.created - getTimezoneOffsetMillis()), "yyyy-mm-dd"),
-          )
-          .map(c => (
+    <>
+      <List
+        sx={{
+          "& li": {
+            border: "1px solid #DDD",
+          },
+          "& li:first-child": {
+            borderTopLeftRadius: "10px",
+            borderTopRightRadius: "10px",
+          },
+          "& li:last-child": {
+            borderBottomLeftRadius: "10px",
+            borderBottomRightRadius: "10px",
+          },
+        }}
+      >
+        <ListItem>
+          <NewCheckIn fetchCheckIns={fetchCheckIns} />
+        </ListItem>
+        {checkIns.length > 0 ? (
+          checkIns.slice((page - 1) * 10, (page - 1) * 10 + 10).map(c => (
             <ListItem key={c.id}>
               <Grid container alignItems="center">
                 <Grid item xs>
-                  {c.duration} {c.duration === 1 ? "hr" : "hrs"} #{c.tag} {c.activities}
+                  {c.duration} {c.duration === 1 ? "hr" : "hrs"}{" "}
+                  <Typography color="primary" display="inline">
+                    #{c.tag}
+                  </Typography>{" "}
+                  {c.activities}
                 </Grid>
                 <Grid item xs={2} container justifyContent="flex-end">
                   <IconButton color="error" onClick={() => handleDeleteCheckIn(c.id)}>
@@ -79,10 +76,14 @@ function CheckInList() {
               </Grid>
             </ListItem>
           ))
-      ) : (
-        <ListItem sx={{ color: "text.secondary" }}>No check ins within the selected time period</ListItem>
-      )}
-    </List>
+        ) : (
+          <ListItem sx={{ color: "text.secondary" }}>No check ins within the selected time period</ListItem>
+        )}
+      </List>
+      <Grid container justifyContent="center">
+        <Pagination count={Math.ceil(checkIns.length / 10)} page={page} onChange={(e, value) => setPage(value)} />
+      </Grid>
+    </>
   );
 }
 

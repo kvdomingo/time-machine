@@ -1,97 +1,86 @@
 import { useEffect, useState } from "react";
 import Plot from "react-plotly.js";
 import { Grid, Paper, Tab, Tabs } from "@mui/material";
-import dateFormat from "dateformat";
 import { CheckInResponse } from "../../api/types/checkIn";
-import { useSelector } from "../../store/hooks";
-import { selectCheckIns } from "../../store/timeSlice";
-import { getTimezoneOffsetMillis, millisToDays } from "../../utils/dateTime";
 
-interface ChartData {
-  labels: string[];
-  values: number[];
+interface StatsProps {
+  checkIns: CheckInResponse[];
 }
 
-function Stats() {
-  const period = ["day", "week", "month", "allTime"];
-  const [tab, setTab] = useState(0);
-  const [data, setData] = useState<ChartData>({ labels: [], values: [] });
-  const checkIns = useSelector(selectCheckIns);
+interface Data {
+  tag: string;
+  value: number;
+}
+
+enum ChartType {
+  Pie,
+  Bar,
+}
+
+function Stats({ checkIns }: StatsProps) {
+  const [chartSelector, setChartSelector] = useState<ChartType>(ChartType.Pie);
+  const [data, setData] = useState<any>({});
 
   useEffect(() => {
-    updateStats();
-  }, [tab, checkIns]);
+    let uniqueTags = [...new Set(checkIns.map(c => c.tag))];
+    let stats: Data[] = uniqueTags.map(tag => ({ tag, value: 0 }));
+    checkIns.forEach(c => {
+      let indexOfTag = stats.findIndex(s => s.tag === c.tag);
+      stats[indexOfTag].value += c.duration;
+    });
+    stats.sort((a, b) => a.value - b.value);
 
-  function condition(checkIn: CheckInResponse) {
-    const now = new Date();
-
-    switch (period[tab]) {
-      case "allTime":
-        return true;
-      case "month": {
-        return (
-          dateFormat(now, "yyyy-mm") === dateFormat(new Date(checkIn.created - getTimezoneOffsetMillis()), "yyyy-mm")
-        );
+    switch (chartSelector) {
+      case ChartType.Pie: {
+        setData({
+          labels: stats.map(s => s.tag),
+          values: stats.map(s => s.value),
+          type: "pie",
+        });
+        break;
       }
-      case "week": {
-        return (
-          millisToDays(now.getTime()) - millisToDays(new Date(checkIn.created - getTimezoneOffsetMillis()).getTime()) <=
-          7
-        );
+      case ChartType.Bar: {
+        setData({
+          x: stats.map(s => s.value),
+          y: stats.map(s => s.tag),
+          type: "bar",
+          orientation: "h",
+          text: stats.map(s => `${s.tag} ${s.value} ${s.value === 1 ? "hr" : "hrs"}`),
+        });
+        break;
       }
-      case "day": {
-        return (
-          dateFormat(now, "yyyy-mm-dd") ===
-          dateFormat(new Date(checkIn.created - getTimezoneOffsetMillis()), "yyyy-mm-dd")
-        );
+      default: {
+        setData({});
       }
     }
-  }
-
-  function updateStats() {
-    let stats = {} as { [key: string]: number };
-    let checkIns_ = checkIns.filter(condition);
-    let uniqueTags = new Set(checkIns_.map(c => c.tag));
-    uniqueTags.forEach(tag => {
-      stats[tag] = 0;
-    });
-    checkIns_.forEach(c => {
-      stats[c.tag] += c.duration;
-    });
-    chartUpdate(stats);
-  }
-
-  function chartUpdate(data: { [key: string]: number }) {
-    setData({
-      labels: Object.keys(data),
-      values: Object.values(data),
-    });
-  }
+  }, [checkIns, chartSelector]);
 
   return (
     <Paper elevation={2} sx={{ p: 2 }}>
-      <Tabs value={tab} onChange={(e, newValue) => setTab(newValue)}>
-        <Tab label="today" />
-        <Tab label="this week" />
-        <Tab label="this month" />
-        <Tab label="all-time" />
+      <Tabs value={chartSelector} onChange={(e, newValue) => setChartSelector(newValue)}>
+        <Tab label="pie" />
+        <Tab label="bar" />
       </Tabs>
-      <Grid container mt={2} justifyContent="center" sx={{ overflow: "scroll" }}>
-        {data.values.length === 0 || data.values.reduce((acc, val) => acc + val, 0) === 0 ? (
-          "No check ins for the selected period"
+      <Grid container justifyContent="center" sx={{ overflow: "scroll" }}>
+        {checkIns.length === 0 ? (
+          "No check ins within the selected period"
         ) : (
           <Plot
-            data={[{ ...data, type: "pie" }]}
+            data={[data]}
             layout={{
               width: 400,
-              height: 400,
-              margin: { pad: 0, t: 0, b: 0, l: 0, r: 0 },
+              height: 500,
+              margin: { t: 0, b: 0, l: 0, r: 0, pad: 0 },
               legend: {
                 orientation: "h",
               },
               font: {
                 family: "Nunito",
               },
+            }}
+            config={{
+              responsive: true,
+              displayModeBar: false,
             }}
           />
         )}

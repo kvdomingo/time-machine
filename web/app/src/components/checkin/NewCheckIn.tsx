@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Check, Close } from "@mui/icons-material";
-import { Grid, IconButton, TextField } from "@mui/material";
+import { Add, Check, Close } from "@mui/icons-material";
+import { Button, Grid, IconButton, TextField } from "@mui/material";
 import api from "../../api";
 import { CheckInForm } from "../../api/types/checkIn";
 
@@ -13,10 +13,9 @@ enum CheckInStatus {
 
 interface NewCheckInProps {
   fetchCheckIns: () => void;
-  exitCreating: () => void;
 }
 
-function NewCheckIn({ fetchCheckIns, exitCreating }: NewCheckInProps) {
+function NewCheckIn({ fetchCheckIns }: NewCheckInProps) {
   const initialCheckIn: CheckInForm = {
     duration: 0,
     tag: "",
@@ -30,6 +29,7 @@ function NewCheckIn({ fetchCheckIns, exitCreating }: NewCheckInProps) {
 
   const [newCheckInData, setNewCheckInData] = useState({ ...initialCheckIn });
   const [formErrors, setFormErrors] = useState<typeof initialErrors>({ ...initialErrors });
+  const [creating, setCreating] = useState(false);
 
   function handleChange(e: any) {
     const { name, value } = e.target;
@@ -79,13 +79,13 @@ function NewCheckIn({ fetchCheckIns, exitCreating }: NewCheckInProps) {
       .create(newCheckInData)
       .then(() => {
         fetchCheckIns();
-        exitCreating();
+        setCreating(false);
         setNewCheckInData({ ...initialCheckIn });
       })
       .catch(err => console.error(err));
   }
 
-  return (
+  return creating ? (
     <form onSubmit={handleCreateCheckIn}>
       <Grid container spacing={1}>
         <Grid item xs={2}>
@@ -130,7 +130,7 @@ function NewCheckIn({ fetchCheckIns, exitCreating }: NewCheckInProps) {
           <IconButton
             onClick={() => {
               setNewCheckInData({ ...initialCheckIn });
-              exitCreating();
+              setCreating(false);
             }}
           >
             <Close />
@@ -141,6 +141,12 @@ function NewCheckIn({ fetchCheckIns, exitCreating }: NewCheckInProps) {
         </Grid>
       </Grid>
     </form>
+  ) : (
+    <Grid container justifyContent="center">
+      <Button variant="text" color="primary" startIcon={<Add />} onClick={() => setCreating(true)}>
+        Check In
+      </Button>
+    </Grid>
   );
 }
 
