@@ -253,5 +253,39 @@ class CognitoHandler:
             logger.error(str(e))
             return AwsError(error=str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def make_admin(self, username: str):
+        try:
+            self.client.admin_add_user_to_group(
+                UserPoolId=self.user_pool,
+                Username=username,
+                GroupName="Admin",
+            )
+            self.client.admin_remove_user_from_group(
+                UserPoolId=self.user_pool,
+                Username=username,
+                GroupName="NonAdmin",
+            )
+            return None, None
+        except Exception as e:
+            logger.error(str(e))
+            return None, AwsError(error=str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def remove_admin(self, username: str):
+        try:
+            self.client.admin_add_user_to_group(
+                UserPoolId=self.user_pool,
+                Username=username,
+                GroupName="NonAdmin",
+            )
+            self.client.admin_remove_user_from_group(
+                UserPoolId=self.user_pool,
+                Username=username,
+                GroupName="Admin",
+            )
+            return None, None
+        except Exception as e:
+            logger.error(str(e))
+            return None, AwsError(error=str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 cognito = CognitoHandler()
