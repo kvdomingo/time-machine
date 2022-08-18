@@ -1,15 +1,18 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import api from "./api";
-import LoggedInView from "./components/LoggedInView";
-import CheckInView from "./components/checkin";
-import AdminView from "./components/checkin/AdminView";
-import Login from "./components/login/Login";
+import logo from "./assets/logo192.png";
 import FullPageLoading from "./components/shared/FullPageLoading";
 import GlobalNotification from "./components/shared/GlobalNotification";
-import UserManagement from "./components/userManagement";
 import { useDispatch, useSelector } from "./store/hooks";
 import { selectLoggedIn, updateLoggedIn, updateUser } from "./store/timeSlice";
+
+const LoggedInView = lazy(() => import("./components/LoggedInView"));
+const CheckInView = lazy(() => import("./components/checkin"));
+const AdminView = lazy(() => import("./components/checkin/AdminView"));
+const Login = lazy(() => import("./components/login"));
+const UserManagement = lazy(() => import("./components/userManagement"));
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -20,20 +23,19 @@ function App() {
     api.auth
       .getUser()
       .then(res => {
-        let { data } = res;
+        dispatch(updateUser(res.data));
         dispatch(updateLoggedIn(true));
-        dispatch(updateUser(data));
       })
-      .catch(() => {
-        dispatch(updateLoggedIn(false));
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .catch(() => dispatch(updateLoggedIn(false)))
+      .finally(() => setLoading(false));
   }, [dispatch]);
 
   return (
     <Router>
+      <Helmet>
+        <link rel="icon" href={logo} />
+        <link rel="apple-touch-icon" href={logo} />
+      </Helmet>
       <Suspense fallback={<FullPageLoading />}>
         <Routes>
           {loading ? (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
 import { AccountCircle } from "@mui/icons-material";
 import { Avatar, Grid } from "@mui/material";
 import { DataGrid, GridActionsCellItem, GridColumns } from "@mui/x-data-grid";
@@ -63,6 +64,9 @@ function UserManagement() {
 
   return (
     <>
+      <Helmet>
+        <title>User Management | Time Machine</title>
+      </Helmet>
       <Grid container spacing={2} my={2} sx={{ height: "80vh" }}>
         <DataGrid columns={columns} rows={users} rowsPerPageOptions={[]} autoPageSize disableSelectionOnClick />
       </Grid>

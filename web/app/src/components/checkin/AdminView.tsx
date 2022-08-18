@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
 import { Avatar, Grid, Typography } from "@mui/material";
 import { DataGrid, GridColumns } from "@mui/x-data-grid";
 import dateFormat from "dateformat";
@@ -106,22 +107,27 @@ function AdminView() {
   }, [filters, checkIns]);
 
   return (
-    <Grid container my={2} alignItems="center" justifyContent="center" sx={{ height: "80vh" }}>
-      {loading ? (
-        <Loading width="6em" />
-      ) : (
-        <DataGrid
-          columns={summary ? summaryColumns : columns}
-          rows={summary ? summaryCheckins : filteredCheckIns}
-          rowsPerPageOptions={[]}
-          autoPageSize
-          disableSelectionOnClick
-          components={{
-            Toolbar: () => <AdminTableToolbar summary={summary} setSummary={setSummary} />,
-          }}
-        />
-      )}
-    </Grid>
+    <>
+      <Helmet>
+        <title>Admin View | Time Machine</title>
+      </Helmet>
+      <Grid container my={2} alignItems="center" justifyContent="center" sx={{ height: "80vh" }}>
+        {loading ? (
+          <Loading width="6em" />
+        ) : (
+          <DataGrid
+            columns={summary ? summaryColumns : columns}
+            rows={summary ? summaryCheckins : filteredCheckIns}
+            rowsPerPageOptions={[]}
+            autoPageSize
+            disableSelectionOnClick
+            components={{
+              Toolbar: () => <AdminTableToolbar summary={summary} setSummary={setSummary} />,
+            }}
+          />
+        )}
+      </Grid>
+    </>
   );
 }
 

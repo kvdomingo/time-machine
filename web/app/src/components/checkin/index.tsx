@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Helmet } from "react-helmet";
 import { AccessTime, ArrowDropDown, Clear, FilterAlt } from "@mui/icons-material";
 import {
   Button,
@@ -98,100 +99,105 @@ function CheckInView() {
   }, [selectedPeriod.value, checkIns, customRangeStart, customRangeEnd, selectedTag]);
 
   return (
-    <Grid container spacing={2} my={2}>
-      <Grid item md={7}>
-        <Grid container alignItems="center" spacing={1}>
-          <Grid item md={12}>
-            <ButtonGroup variant="text" ref={periodSelectorRef}>
-              <Button
-                onClick={() => setOpenPeriodSelectMenu(open => !open)}
-                startIcon={<AccessTime />}
-                endIcon={<ArrowDropDown />}
-              >
-                View: {selectedPeriod.label}
-              </Button>
-            </ButtonGroup>
-            {!!selectedTag && (
-              <ButtonGroup variant="text">
+    <>
+      <Helmet>
+        <title>Time Machine</title>
+      </Helmet>
+      <Grid container spacing={2} my={2}>
+        <Grid item md={7}>
+          <Grid container alignItems="center" spacing={1}>
+            <Grid item md={12}>
+              <ButtonGroup variant="text" ref={periodSelectorRef}>
                 <Button
-                  startIcon={<FilterAlt />}
-                  endIcon={
-                    <IconButton size="small" onClick={() => setSelectedTag(null)}>
-                      <Clear />
-                    </IconButton>
-                  }
+                  onClick={() => setOpenPeriodSelectMenu(open => !open)}
+                  startIcon={<AccessTime />}
+                  endIcon={<ArrowDropDown />}
                 >
-                  Filter: #{selectedTag}
+                  View: {selectedPeriod.label}
                 </Button>
               </ButtonGroup>
-            )}
-            <Popper
-              open={openPeriodSelectMenu}
-              anchorEl={periodSelectorRef.current}
-              transition
-              disablePortal
-              sx={{ zIndex: 99 }}
-            >
-              {({ TransitionProps }) => (
-                <Grow
-                  {...TransitionProps}
-                  style={{
-                    transformOrigin: "left bottom",
-                  }}
-                >
-                  <Paper>
-                    <ClickAwayListener onClickAway={() => setOpenPeriodSelectMenu(false)}>
-                      <MenuList autoFocusItem>
-                        {viewOptions.map(v => (
-                          <MenuItem
-                            selected={v.value === selectedPeriod.value}
-                            onClick={() => {
-                              setSelectedPeriod(v);
-                              setOpenPeriodSelectMenu(false);
-                            }}
-                          >
-                            {v.label}
-                          </MenuItem>
-                        ))}
-                      </MenuList>
-                    </ClickAwayListener>
-                  </Paper>
-                </Grow>
+              {!!selectedTag && (
+                <ButtonGroup variant="text">
+                  <Button
+                    startIcon={<FilterAlt />}
+                    endIcon={
+                      <IconButton size="small" onClick={() => setSelectedTag(null)}>
+                        <Clear />
+                      </IconButton>
+                    }
+                  >
+                    Filter: #{selectedTag}
+                  </Button>
+                </ButtonGroup>
               )}
-            </Popper>
+              <Popper
+                open={openPeriodSelectMenu}
+                anchorEl={periodSelectorRef.current}
+                transition
+                disablePortal
+                sx={{ zIndex: 99 }}
+              >
+                {({ TransitionProps }) => (
+                  <Grow
+                    {...TransitionProps}
+                    style={{
+                      transformOrigin: "left bottom",
+                    }}
+                  >
+                    <Paper>
+                      <ClickAwayListener onClickAway={() => setOpenPeriodSelectMenu(false)}>
+                        <MenuList autoFocusItem>
+                          {viewOptions.map(v => (
+                            <MenuItem
+                              selected={v.value === selectedPeriod.value}
+                              onClick={() => {
+                                setSelectedPeriod(v);
+                                setOpenPeriodSelectMenu(false);
+                              }}
+                            >
+                              {v.label}
+                            </MenuItem>
+                          ))}
+                        </MenuList>
+                      </ClickAwayListener>
+                    </Paper>
+                  </Grow>
+                )}
+              </Popper>
+            </Grid>
+            {selectedPeriod.value === "custom" && (
+              <>
+                <Grid item md>
+                  <DatePicker
+                    onChange={value => setCustomRangeStart(value!.startOf("day"))}
+                    value={customRangeStart}
+                    renderInput={params => <TextField {...params} fullWidth label="Start date" />}
+                    disableFuture
+                  />
+                </Grid>
+                <Grid item md>
+                  <DatePicker
+                    onChange={value => setCustomRangeEnd(value!.endOf("day"))}
+                    value={customRangeEnd}
+                    renderInput={params => <TextField {...params} fullWidth label="End date" />}
+                  />
+                </Grid>
+              </>
+            )}
           </Grid>
-          {selectedPeriod.value === "custom" && (
-            <>
-              <Grid item md>
-                <DatePicker
-                  onChange={value => setCustomRangeStart(value!.startOf("day"))}
-                  value={customRangeStart}
-                  renderInput={params => <TextField {...params} fullWidth label="Start date" />}
-                  disableFuture
-                />
-              </Grid>
-              <Grid item md>
-                <DatePicker
-                  onChange={value => setCustomRangeEnd(value!.endOf("day"))}
-                  value={customRangeEnd}
-                  renderInput={params => <TextField {...params} fullWidth label="End date" />}
-                />
-              </Grid>
-            </>
-          )}
+        </Grid>
+        <Grid item md={5} />
+        <Grid item md={7}>
+          <CheckInList
+            checkIns={filteredCheckIns}
+            setSelectedTag={tag => setSelectedTag(prevTag => (prevTag === tag ? null : tag))}
+          />
+        </Grid>
+        <Grid item md={5}>
+          <Stats checkIns={filteredCheckIns} byTag={!!selectedTag} />
         </Grid>
       </Grid>
-      <Grid item md={5} />
-      <Grid item md={7}>
-        <CheckInList
-          checkIns={filteredCheckIns}
-          setSelectedTag={tag => setSelectedTag(prevTag => (prevTag === tag ? null : tag))}
-        />
-      </Grid>
-      <Grid item md={5}>
-        <Stats checkIns={filteredCheckIns} byTag={!!selectedTag} />
-      </Grid>
-    </Grid>
+    </>
   );
 }
 
