@@ -19,9 +19,9 @@ import { cloneDeep } from "lodash-es";
 import moment from "moment/moment";
 import { useSelector } from "../../store/hooks";
 import { selectCheckIns } from "../../store/timeSlice";
-import { getTimezoneOffsetMillis } from "../../utils/dateTime";
 import CheckInList from "./CheckInList";
 import Stats from "./Stats";
+import TextLog from "./TextLog";
 
 type viewOptionValue = "day" | "week" | "month" | "custom";
 
@@ -50,8 +50,10 @@ function CheckInView() {
     },
   ];
   const checkIns = useSelector(selectCheckIns);
+  const todayCheckIns = checkIns.filter(c => c.record_date === moment().startOf("day").format("YYYY-MM-DD"));
+  const todayCheckInHours = todayCheckIns.map(c => c.duration).reduce((agg, curr) => agg + curr, 0);
   const [filteredCheckIns, setFilteredCheckIns] = useState(cloneDeep(checkIns));
-  const [selectedPeriod, setSelectedPeriod] = useState<ViewOption>(viewOptions[1]);
+  const [selectedPeriod, setSelectedPeriod] = useState<ViewOption>(viewOptions[0]);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [openPeriodSelectMenu, setOpenPeriodSelectMenu] = useState(false);
   const [customRangeStart, setCustomRangeStart] = useState(moment().startOf("isoWeek"));
@@ -64,28 +66,22 @@ function CheckInView() {
       case "day": {
         filtered = checkIns.filter(
           c =>
-            moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("day")) &&
-            moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(moment().endOf("day")),
+            moment(c.created).isSameOrAfter(moment().startOf("day")) &&
+            moment(c.created).isSameOrBefore(moment().endOf("day")),
         );
         break;
       }
       case "week": {
-        filtered = checkIns.filter(c =>
-          moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("isoWeek")),
-        );
+        filtered = checkIns.filter(c => moment(c.created).isSameOrAfter(moment().startOf("isoWeek")));
         break;
       }
       case "month": {
-        filtered = checkIns.filter(c =>
-          moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(moment().startOf("month")),
-        );
+        filtered = checkIns.filter(c => moment(c.created).isSameOrAfter(moment().startOf("month")));
         break;
       }
       case "custom": {
         filtered = checkIns.filter(
-          c =>
-            moment(c.created - getTimezoneOffsetMillis()).isSameOrAfter(customRangeStart) &&
-            moment(c.created - getTimezoneOffsetMillis()).isSameOrBefore(customRangeEnd),
+          c => moment(c.created).isSameOrAfter(customRangeStart) && moment(c.created).isSameOrBefore(customRangeEnd),
         );
         break;
       }
@@ -104,7 +100,7 @@ function CheckInView() {
         <title>Time Machine</title>
       </Helmet>
       <Grid container spacing={2} my={2}>
-        <Grid item md={7}>
+        <Grid item md={8}>
           <Grid container alignItems="center" spacing={1}>
             <Grid item md={12}>
               <ButtonGroup variant="text" ref={periodSelectorRef}>
@@ -186,15 +182,21 @@ function CheckInView() {
             )}
           </Grid>
         </Grid>
-        <Grid item md={5} />
-        <Grid item md={7}>
+        <Grid item md={4}>
+          Going on{" "}
+          <b>
+            {todayCheckInHours} hour{todayCheckInHours !== 1 && "s"}
+          </b>
+        </Grid>
+        <Grid item md={8}>
           <CheckInList
             checkIns={filteredCheckIns}
             setSelectedTag={tag => setSelectedTag(prevTag => (prevTag === tag ? null : tag))}
           />
         </Grid>
-        <Grid item md={5}>
-          <Stats checkIns={filteredCheckIns} byTag={!!selectedTag} />
+        <Grid item md={4}>
+          {/*<Stats checkIns={filteredCheckIns} byTag={!!selectedTag} />*/}
+          <TextLog checkIns={todayCheckIns} />
         </Grid>
       </Grid>
     </>

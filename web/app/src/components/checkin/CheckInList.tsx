@@ -6,7 +6,6 @@ import api from "../../api";
 import { CheckInResponse } from "../../api/types/checkIn";
 import { useDispatch } from "../../store/hooks";
 import { updateCheckIns } from "../../store/timeSlice";
-import { getTimezoneOffsetMillis } from "../../utils/dateTime";
 import NewCheckIn from "./NewCheckIn";
 
 interface CheckInListProps {
@@ -17,6 +16,8 @@ interface CheckInListProps {
 function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
+  const [count, setCount] = useState(0);
+  const [tagCache, setTagCache] = useState<string[]>([]);
 
   useEffect(() => {
     fetchCheckIns();
@@ -29,7 +30,11 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
   function fetchCheckIns() {
     api.checkin
       .list()
-      .then(res => dispatch(updateCheckIns(res.data)))
+      .then(res => {
+        dispatch(updateCheckIns(res.data.results));
+        setCount(res.data.count);
+        setTagCache([...new Set(res.data.results.map(c => c.tag))]);
+      })
       .catch(err => console.error(err.message));
   }
 
@@ -58,15 +63,15 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
         }}
       >
         <ListItem>
-          <NewCheckIn fetchCheckIns={fetchCheckIns} />
+          <NewCheckIn fetchCheckIns={fetchCheckIns} tagCache={tagCache} />
         </ListItem>
         {checkIns.length > 0 ? (
-          checkIns.slice((page - 1) * 10, (page - 1) * 10 + 10).map(c => (
+          checkIns.map(c => (
             <ListItem key={c.id}>
               <Grid container alignItems="center">
                 <Grid item xs={12} md={1}>
                   <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                    {moment(c.created - getTimezoneOffsetMillis()).format("MM/DD")}
+                    {moment(c.created).format("MM/DD")}
                   </Typography>
                 </Grid>
                 <Grid item xs md container alignItems="center">
@@ -95,7 +100,7 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
         )}
       </List>
       <Grid container justifyContent="center">
-        <Pagination count={Math.ceil(checkIns.length / 10)} page={page} onChange={(e, value) => setPage(value)} />
+        <Pagination count={count} page={page} onChange={(e, value) => setPage(value)} />
       </Grid>
     </>
   );

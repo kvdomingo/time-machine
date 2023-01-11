@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { CookiesProvider } from "react-cookie";
 import { Provider } from "react-redux";
-import { ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import App from "./App";
@@ -21,6 +21,7 @@ root.render(
         <AxiosInterceptorProvider>
           <ThemeProvider theme={theme}>
             <LocalizationProvider dateAdapter={AdapterMoment}>
+              <CssBaseline />
               <App />
             </LocalizationProvider>
           </ThemeProvider>

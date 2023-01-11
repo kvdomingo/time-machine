@@ -1,15 +1,25 @@
 export interface CheckInResponse {
   id: string;
-  created: number;
-  modified: number;
+  created: string;
+  modified: string;
   duration: number;
+  start_time: string;
+  record_date: string;
   tag: string;
   activities: string;
-  author: string;
 }
 
 export interface CheckInForm {
   duration: number;
+  start_time: string;
+  record_date: string;
   tag: string;
   activities: string;
+}
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T;
 }
