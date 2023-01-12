@@ -5,6 +5,7 @@ import {
   Button,
   ButtonGroup,
   ClickAwayListener,
+  FormControlLabel,
   Grid,
   Grow,
   IconButton,
@@ -12,6 +13,7 @@ import {
   MenuList,
   Paper,
   Popper,
+  Switch,
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -20,7 +22,6 @@ import moment from "moment/moment";
 import { useSelector } from "../../store/hooks";
 import { selectCheckIns } from "../../store/timeSlice";
 import CheckInList from "./CheckInList";
-import Stats from "./Stats";
 import TextLog from "./TextLog";
 
 type viewOptionValue = "day" | "week" | "month" | "custom";
@@ -52,6 +53,7 @@ function CheckInView() {
   const checkIns = useSelector(selectCheckIns);
   const todayCheckIns = checkIns.filter(c => c.record_date === moment().startOf("day").format("YYYY-MM-DD"));
   const todayCheckInHours = todayCheckIns.map(c => c.duration).reduce((agg, curr) => agg + curr, 0);
+  const [groupCheckInTags, setGroupCheckInTags] = useState(true);
   const [filteredCheckIns, setFilteredCheckIns] = useState(cloneDeep(checkIns));
   const [selectedPeriod, setSelectedPeriod] = useState<ViewOption>(viewOptions[0]);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -182,11 +184,19 @@ function CheckInView() {
             )}
           </Grid>
         </Grid>
-        <Grid item md={4}>
-          Going on{" "}
-          <b>
-            {todayCheckInHours} hour{todayCheckInHours !== 1 && "s"}
-          </b>
+        <Grid container item md={4} alignItems="center">
+          <Grid item xs>
+            Going on{" "}
+            <b>
+              {todayCheckInHours} hour{todayCheckInHours !== 1 && "s"}
+            </b>
+          </Grid>
+          <Grid item xs container justifyContent="flex-end">
+            <FormControlLabel
+              control={<Switch checked={groupCheckInTags} onChange={e => setGroupCheckInTags(e.target.checked)} />}
+              label="Group similar"
+            />
+          </Grid>
         </Grid>
         <Grid item md={8}>
           <CheckInList
@@ -196,7 +206,7 @@ function CheckInView() {
         </Grid>
         <Grid item md={4}>
           {/*<Stats checkIns={filteredCheckIns} byTag={!!selectedTag} />*/}
-          <TextLog checkIns={todayCheckIns} />
+          <TextLog checkIns={todayCheckIns} groupCheckInTags={groupCheckInTags} />
         </Grid>
       </Grid>
     </>
