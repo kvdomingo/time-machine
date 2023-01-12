@@ -91,6 +91,10 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
                     <Typography variant="body1">#{c.tag}</Typography>
                   </Button>{" "}
                   <Typography variant="body1">{c.activities}</Typography>
+                  <Typography variant="body1" ml={1}>
+                    ({moment(c.start_time, "HH:mm:ss").format("HH:mm")} -{" "}
+                    {moment(c.start_time, "HH:mm:ss").add(c.duration, "hours").format("HH:mm")})
+                  </Typography>
                 </Grid>
                 <Grid item xs={2} md={2} container justifyContent={{ md: "flex-end" }}>
                   <IconButton color="error" onClick={() => handleDeleteCheckIn(c.id)} size="small">
