@@ -10,7 +10,7 @@ function TextLog({ checkIns }: TextLogProps) {
   function generateLog() {
     let textLog = `checkin ${moment().format("YYYY-MM-DD")}`;
     return textLog.concat(
-      ...checkIns.map(c => `\n- ${c.duration} hr${c.duration === 1 ? "" : "s"} #${c.tag} ${c.activities}`),
+      ...checkIns.reverse().map(c => `\n- ${c.duration} hr${c.duration === 1 ? "" : "s"} #${c.tag} ${c.activities}`),
     );
   }
 
