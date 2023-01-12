@@ -29,7 +29,7 @@ function TextLog({ checkIns }: TextLogProps) {
         borderRadius: 5,
         minHeight: 150,
       }}
-      value={generateLog()}
+      value={checkIns.length > 0 ? generateLog() : ""}
     />
   );
 }

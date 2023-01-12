@@ -10,8 +10,8 @@ const axi = axios.create({ baseURL, xsrfCookieName: "csrftoken", xsrfHeaderName:
 
 const api = {
   checkin: {
-    list(): Promise<AxiosResponse<PaginatedResponse<CheckInResponse[]>>> {
-      return axi.get("/checkin");
+    list(page: number = 1): Promise<AxiosResponse<PaginatedResponse<CheckInResponse[]>>> {
+      return axi.get(`/checkin?page=${page}`);
     },
     get(id: string): Promise<AxiosResponse<CheckInResponse>> {
       return axi.get(`/checkin/${id}`);

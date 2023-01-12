@@ -1,17 +1,17 @@
 version: '3'
 
 env:
-  PYTHON_ENV: dev
-  NAME: time-machine-{{.PYTHON_ENV}}
+  ENV: dev
+  NAME: time-machine-{{.ENV}}
 
 dotenv:
-  - .env
+  - deploy/dev/.env
 
 tasks:
   default:
     desc: Build and start containers
     cmds:
-      - docker compose -p {{.NAME}} up -d --build --remove-orphans {{.CLI_ARGS}}
+      - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml up -d --build --remove-orphans {{.CLI_ARGS}}
       - task logs
 
   frontend-start:
@@ -29,34 +29,34 @@ tasks:
   reload-proxy:
     desc: Reload proxy config
     cmds:
-      - docker compose -p {{.NAME}} exec -- proxy nginx -s reload
+      - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml exec -- proxy nginx -s reload
 
   psql:
     desc: Access postgres cli
     cmds:
-      - docker compose -p {{.NAME}} exec -- postgres psql -U $POSTGRESQL_USERNAME -d $POSTGRESQL_DATABASE
+      - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml exec -- postgres psql -U $POSTGRESQL_USERNAME -d $POSTGRESQL_DATABASE
 
   exec:
     desc: Execute command in specified container
     cmds:
-      - docker compose -p {{.NAME}} exec -- {{.CLI_ARGS}}
+      - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml  exec -- {{.CLI_ARGS}}
 
   restart:
     desc: Restart all containers
     cmds:
-      - docker compose -p {{.NAME}} restart {{.CLI_ARGS}}
+      - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml restart {{.CLI_ARGS}}
 
   logs:
     desc: Show Docker logs
     cmds:
-      - docker compose -p {{.NAME}} logs --follow {{.CLI_ARGS}}
+      - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml logs --follow {{.CLI_ARGS}}
 
   shutdown:
     desc: Stop all containers
     cmds:
-      - docker compose -p {{.NAME}} stop {{.CLI_ARGS}}
+      - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml stop {{.CLI_ARGS}}
 
   clean:
     desc: Stop and remove all containers
     cmds:
-      - docker compose -p {{.NAME}} down -v --remove-orphans
+      - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml down -v --remove-orphans

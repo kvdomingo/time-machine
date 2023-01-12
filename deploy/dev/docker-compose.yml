@@ -7,18 +7,17 @@ networks:
 services:
   backend:
     build:
-      context: .
-      dockerfile: dev.Dockerfile
+      context: ../..
+      target: dev
     image: kvdomingo/time-machine-api:latest
     env_file: .env
     volumes:
-      - .:/backend
+      - ../..:/backend
     depends_on:
       - postgres
 
   frontend:
-    build: ./web/app
-    image: kvdomingo/time-machine-app:latest
+    image: node:16-alpine
     environment:
       - HOST=0.0.0.0
       - PORT=3000
@@ -26,21 +25,26 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - TSC_WATCHFILE=UseFsEventsWithFallbackDynamicPolling
       - WDS_SOCKET_PORT=0
+    working_dir: /web
     volumes:
-      - ./web/app:/web
+      - ../../web/app:/web
+    entrypoint:
+      - /bin/sh
+      - "-c"
+      - "yarn install && exec yarn start"
 
   proxy:
     image: bitnami/nginx:latest
     environment:
       - NGINX_HTTP_PORT_NUMBER=8000
     volumes:
-      - ./proxy/dev:/opt/bitnami/nginx/conf/server_blocks:ro
+      - ./proxy:/opt/bitnami/nginx/conf/server_blocks:ro
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.time_machine.rule=Host(`dev.time-machine.localhost`)"
-      - "traefik.http.routers.time_machine.entrypoints=http"
+      - "traefik.http.routers.time_machine-dev.rule=Host(`dev.time-machine.localhost`)"
+      - "traefik.http.routers.time_machine-dev.entrypoints=http"
       - "traefik.docker.network=gateway"
-      - "traefik.http.services.time_machine.loadbalancer.server.port=8000"
+      - "traefik.http.services.time_machine-dev.loadbalancer.server.port=8000"
     restart: on-failure
     networks:
       - default

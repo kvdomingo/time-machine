@@ -27,9 +27,9 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
     setPage(1);
   }, [checkIns]);
 
-  function fetchCheckIns() {
+  function fetchCheckIns(_page: number = page) {
     api.checkin
-      .list()
+      .list(_page)
       .then(res => {
         dispatch(updateCheckIns(res.data.results));
         setCount(res.data.count);
@@ -41,8 +41,13 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
   function handleDeleteCheckIn(id: string) {
     api.checkin
       .delete(id)
-      .then(fetchCheckIns)
+      .then(() => fetchCheckIns())
       .catch(err => console.error(err.message));
+  }
+
+  function handlePageChange(e: any, page: number) {
+    setPage(page);
+    fetchCheckIns(page);
   }
 
   return (
@@ -100,7 +105,7 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
         )}
       </List>
       <Grid container justifyContent="center">
-        <Pagination count={count} page={page} onChange={(e, value) => setPage(value)} />
+        <Pagination count={Math.ceil(count / 10)} page={page} onChange={handlePageChange} />
       </Grid>
     </>
   );

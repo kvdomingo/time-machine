@@ -7,8 +7,8 @@ networks:
 services:
   backend:
     build:
-      context: .
-      dockerfile: prod.Dockerfile
+      context: ../..
+      target: prod
     image: kvdomingo/time-machine-api:latest
     env_file: .env
     environment:
@@ -22,7 +22,7 @@ services:
     environment:
       - NGINX_HTTP_PORT_NUMBER=8001
     volumes:
-      - ./proxy/prod:/opt/bitnami/nginx/conf/server_blocks:ro
+      - ./proxy:/opt/bitnami/nginx/conf/server_blocks:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.time_machine.rule=Host(`time-machine.localhost`)"
