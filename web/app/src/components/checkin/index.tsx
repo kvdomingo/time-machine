@@ -18,41 +18,42 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { cloneDeep } from "lodash-es";
-import moment from "moment/moment";
+import moment from "moment";
 import { useSelector } from "../../store/hooks";
-import { selectCheckIns } from "../../store/timeSlice";
+import { selectCheckIns, selectTextLog } from "../../store/timeSlice";
+import { ViewOption } from "../../types/dateRangeViewOption";
 import CheckInList from "./CheckInList";
 import TextLog from "./TextLog";
-
-type viewOptionValue = "day" | "week" | "month" | "custom";
-
-interface ViewOption {
-  label: string;
-  value: viewOptionValue;
-}
 
 function CheckInView() {
   const viewOptions: ViewOption[] = [
     {
       label: "Today",
       value: "day",
+      start: moment().startOf("day"),
+      end: moment().endOf("day"),
     },
     {
       label: "This week",
       value: "week",
+      start: moment().startOf("isoWeek"),
+      end: moment().endOf("day"),
     },
     {
       label: "This month",
       value: "month",
+      start: moment().startOf("month"),
+      end: moment().endOf("day"),
     },
     {
       label: "Custom",
       value: "custom",
+      start: moment().startOf("day"),
+      end: moment().endOf("day"),
     },
   ];
   const checkIns = useSelector(selectCheckIns);
-  const todayCheckIns = checkIns.filter(c => c.record_date === moment().startOf("day").format("YYYY-MM-DD"));
-  const todayCheckInHours = todayCheckIns.map(c => c.duration).reduce((agg, curr) => agg + curr, 0);
+  const textLog = useSelector(selectTextLog);
   const [groupCheckInTags, setGroupCheckInTags] = useState(true);
   const [filteredCheckIns, setFilteredCheckIns] = useState(cloneDeep(checkIns));
   const [selectedPeriod, setSelectedPeriod] = useState<ViewOption>(viewOptions[0]);
@@ -68,17 +69,17 @@ function CheckInView() {
       case "day": {
         filtered = checkIns.filter(
           c =>
-            moment(c.created).isSameOrAfter(moment().startOf("day")) &&
-            moment(c.created).isSameOrBefore(moment().endOf("day")),
+            moment(c.created).isSameOrAfter(selectedPeriod.start) &&
+            moment(c.created).isSameOrBefore(selectedPeriod.end),
         );
         break;
       }
       case "week": {
-        filtered = checkIns.filter(c => moment(c.created).isSameOrAfter(moment().startOf("isoWeek")));
+        filtered = checkIns.filter(c => moment(c.created).isSameOrAfter(selectedPeriod.start));
         break;
       }
       case "month": {
-        filtered = checkIns.filter(c => moment(c.created).isSameOrAfter(moment().startOf("month")));
+        filtered = checkIns.filter(c => moment(c.created).isSameOrAfter(selectedPeriod.start));
         break;
       }
       case "custom": {
@@ -95,6 +96,12 @@ function CheckInView() {
     filtered = filtered.filter(f => (!!selectedTag ? f.tag === selectedTag : true));
     setFilteredCheckIns(filtered);
   }, [selectedPeriod.value, checkIns, customRangeStart, customRangeEnd, selectedTag]);
+
+  useEffect(() => {}, [checkIns]);
+
+  function calculateCheckInHours() {
+    return textLog.map(t => t.duration).reduce((acc, val) => acc + val, 0);
+  }
 
   return (
     <>
@@ -188,7 +195,7 @@ function CheckInView() {
           <Grid item xs>
             Going on{" "}
             <b>
-              {todayCheckInHours} hour{todayCheckInHours !== 1 && "s"}
+              {calculateCheckInHours()} hour{calculateCheckInHours() !== 1 && "s"}
             </b>
           </Grid>
           <Grid item xs container justifyContent="flex-end">
@@ -206,7 +213,7 @@ function CheckInView() {
         </Grid>
         <Grid item md={4}>
           {/*<Stats checkIns={filteredCheckIns} byTag={!!selectedTag} />*/}
-          <TextLog checkIns={todayCheckIns} groupCheckInTags={groupCheckInTags} />
+          <TextLog />
         </Grid>
       </Grid>
     </>

@@ -3,10 +3,11 @@ from rest_framework.routers import SimpleRouter
 from rest_framework.schemas import get_schema_view
 
 from time_machine import __version__
-from .views import CheckInViewSet
+from .views import CheckInViewSet, TextLogViewSet
 
 router = SimpleRouter(trailing_slash=False)
 router.register("checkin", CheckInViewSet)
+router.register("textLog", TextLogViewSet)
 
 urlpatterns = [
     path(

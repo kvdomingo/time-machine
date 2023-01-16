@@ -14,7 +14,7 @@ class CheckIn(models.Model):
     activities = models.CharField(max_length=256)
 
     class Meta:
-        ordering = ["-created"]
+        ordering = ["-record_date", "-start_time"]
         verbose_name = "Check in"
         verbose_name_plural = "Check ins"
 

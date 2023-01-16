@@ -1,8 +1,9 @@
 import { ReactElement, useEffect } from "react";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import moment from "moment";
 import { useDispatch } from "../store/hooks";
 import { updateApiRequestLoading, updateGlobalNotification } from "../store/timeSlice";
-import { CheckInForm, CheckInResponse, PaginatedResponse } from "./types/checkIn";
+import { CheckInForm, CheckInResponse, PaginatedResponse, TextLogResponse } from "./types/checkIn";
 
 const baseURL = "/api";
 
@@ -15,6 +16,9 @@ const api = {
     },
     get(id: string): Promise<AxiosResponse<CheckInResponse>> {
       return axi.get(`/checkin/${id}`);
+    },
+    log(recordDate: string = moment().format("YYYY-MM-DD")): Promise<AxiosResponse<TextLogResponse[]>> {
+      return axi.get(`/textLog?record_date=${recordDate}`);
     },
     create(body: CheckInForm): Promise<AxiosResponse<CheckInResponse>> {
       return axi.post("/checkin", body);

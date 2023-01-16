@@ -23,3 +23,9 @@ export interface PaginatedResponse<T> {
   previous: string | null;
   results: T;
 }
+
+export interface TextLogResponse {
+  tag: string;
+  duration: number;
+  activities: string[];
+}

@@ -5,7 +5,7 @@ import moment from "moment";
 import api from "../../api";
 import { CheckInResponse } from "../../api/types/checkIn";
 import { useDispatch } from "../../store/hooks";
-import { updateCheckIns } from "../../store/timeSlice";
+import { updateCheckIns, updateTextLog } from "../../store/timeSlice";
 import NewCheckIn from "./NewCheckIn";
 
 interface CheckInListProps {
@@ -34,6 +34,13 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
         dispatch(updateCheckIns(res.data.results));
         setCount(res.data.count);
         setTagCache([...new Set(res.data.results.map(c => c.tag))]);
+      })
+      .catch(err => console.error(err.message));
+
+    api.checkin
+      .log()
+      .then(res => {
+        dispatch(updateTextLog(res.data));
       })
       .catch(err => console.error(err.message));
   }
@@ -81,7 +88,7 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
                 </Grid>
                 <Grid item xs md container alignItems="center">
                   <Typography variant="body1">
-                    {c.duration} {c.duration === 1 ? "hr" : "hrs"}{" "}
+                    {c.duration.toFixed(3)} {c.duration === 1 ? "hr" : "hrs"}{" "}
                   </Typography>
                   <Button
                     variant="text"

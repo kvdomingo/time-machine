@@ -1,1 +1,1 @@
-from .check_in import CheckInViewSet
+from .check_in import CheckInViewSet, TextLogViewSet
