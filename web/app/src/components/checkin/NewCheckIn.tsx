@@ -1,17 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Add, Check, Close } from "@mui/icons-material";
 import { Autocomplete, Button, Grid, IconButton, TextField } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
 import moment from "moment";
 import api from "../../api";
 import { CheckInForm } from "../../api/types/checkIn";
-import { DEFAULT_DATE_FORMAT } from "../../utils/constants";
+import { DEFAULT_DATE_FORMAT, DEFAULT_TIME_FORMAT } from "../../utils/constants";
 
 enum CheckInStatus {
   OK = "",
   RequiredField = "This field is required",
   NumberOnly = "This field should be a positive number",
-  NoSpaces = "This field cannot contain spaces",
 }
 
 interface NewCheckInProps {
@@ -22,7 +21,7 @@ interface NewCheckInProps {
 function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
   const initialCheckIn: CheckInForm = {
     duration: 0,
-    start_time: moment().format("HH:mm"),
+    start_time: moment().format(DEFAULT_TIME_FORMAT),
     record_date: moment().format(DEFAULT_DATE_FORMAT),
     tag: "",
     activities: "",
@@ -35,49 +34,20 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
     activities: CheckInStatus.OK,
   };
 
-  const [endTime, setEndTime] = useState(moment().format("HH:mm"));
+  const [endTime, setEndTime] = useState(moment().format(DEFAULT_TIME_FORMAT));
   const [newCheckInData, setNewCheckInData] = useState({ ...initialCheckIn });
   const [formErrors, setFormErrors] = useState<typeof initialErrors>({ ...initialErrors });
   const [creating, setCreating] = useState(false);
   const [tagInputValue, setTagInputValue] = useState("");
+  const autoUpdateRef = useRef<NodeJS.Timer>(
+    setInterval(() => handleChangeEndTime(moment().format(DEFAULT_TIME_FORMAT)), 60 * 1000),
+  );
 
   useEffect(() => {
-    let _startTime = moment(newCheckInData.start_time, "HH:mm");
-    const _endTime = moment(_startTime).add(newCheckInData.duration, "hours");
-    if (_endTime.format("HH:mm") !== endTime) setEndTime(_endTime.format("HH:mm"));
-  }, [newCheckInData.duration]);
-
-  useEffect(() => {
-    let _startTime = moment(newCheckInData.start_time, "HH:mm");
-    let _endTime = moment(endTime, "HH:mm");
-    if (_startTime.isAfter(_endTime)) {
-      _startTime = moment(_endTime);
-    }
-    let diff = (_endTime.valueOf() - _startTime.valueOf()) / 1000 / 60 / 60;
-    if (isNaN(diff)) diff = 0;
-    if (newCheckInData.duration !== diff)
-      setNewCheckInData(form => ({
-        ...form,
-        duration: diff,
-        start_time: _startTime.format("HH:mm"),
-      }));
-  }, [newCheckInData.start_time]);
-
-  useEffect(() => {
-    let _startTime = moment(newCheckInData.start_time, "HH:mm");
-    let _endTime = moment(endTime, "HH:mm");
-    if (_endTime.isBefore(_startTime)) {
-      _endTime = moment(_startTime);
-      if (_endTime.format("HH:mm") !== endTime) setEndTime(_endTime.format("HH:mm"));
-    }
-    let diff = (_endTime.valueOf() - _startTime.valueOf()) / 1000 / 60 / 60;
-    if (isNaN(diff)) diff = 0;
-    if (newCheckInData.duration !== diff)
-      setNewCheckInData(form => ({
-        ...form,
-        duration: diff,
-      }));
-  }, [endTime]);
+    return () => {
+      clearTimeout(autoUpdateRef.current);
+    };
+  }, []);
 
   function handleChange(e: any, _name?: string, _value?: string | null) {
     let name = _name != null ? _name : e.target.name;
@@ -93,14 +63,48 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
     let value = _value != null ? _value : e.target.value;
     setNewCheckInData(form => ({
       ...form,
-      [name]:
-        name === "duration"
-          ? !value || isNaN(parseFloat(value))
-            ? 0.0
-            : parseFloat(value)
-          : name === "tag"
-          ? value.replace(/\s+/g, "-")
-          : value,
+      [name]: name === "tag" ? value.replace(/\s+/g, "-") : value,
+    }));
+  }
+
+  function handleChangeStartTime(value: string) {
+    let _startTime = moment(value, DEFAULT_TIME_FORMAT);
+    let _endTime = moment(endTime, DEFAULT_TIME_FORMAT);
+    if (_startTime.isAfter(_endTime)) {
+      _startTime = moment(_endTime);
+    }
+    let diff = (_endTime.valueOf() - _startTime.valueOf()) / 1000 / 60 / 60;
+    if (isNaN(diff)) diff = 0;
+    setNewCheckInData(form => ({
+      ...form,
+      duration: diff,
+      start_time: value,
+    }));
+  }
+
+  function handleChangeEndTime(value: string) {
+    let _startTime = moment(newCheckInData.start_time, DEFAULT_TIME_FORMAT);
+    let _endTime = moment(value, DEFAULT_TIME_FORMAT);
+    if (_endTime.isBefore(_startTime)) {
+      _endTime = moment(_startTime);
+      setEndTime(_endTime.format(DEFAULT_TIME_FORMAT));
+    }
+    let diff = (_endTime.valueOf() - _startTime.valueOf()) / 1000 / 60 / 60;
+    if (isNaN(diff)) diff = 0;
+    setNewCheckInData(form => ({
+      ...form,
+      duration: diff,
+    }));
+    setEndTime(value);
+  }
+
+  function handleChangeDuration(value: number) {
+    let _startTime = moment(newCheckInData.start_time, DEFAULT_TIME_FORMAT);
+    const _endTime = moment(_startTime).add(value, "hours");
+    if (_endTime.format(DEFAULT_TIME_FORMAT) !== endTime) setEndTime(_endTime.format(DEFAULT_TIME_FORMAT));
+    setNewCheckInData(form => ({
+      ...form,
+      duration: value,
     }));
   }
 
@@ -113,12 +117,7 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
             ? CheckInStatus.OK
             : CheckInStatus.NumberOnly;
       } else if (key === "tag") {
-        errors.tag =
-          newCheckInData.tag.length > 0
-            ? !/\s+/g.test(newCheckInData.tag)
-              ? CheckInStatus.OK
-              : CheckInStatus.NoSpaces
-            : CheckInStatus.RequiredField;
+        errors.tag = newCheckInData.tag.length > 0 ? CheckInStatus.OK : CheckInStatus.RequiredField;
       } else {
         errors[key] = (newCheckInData[key] as string).length > 0 ? CheckInStatus.OK : CheckInStatus.RequiredField;
       }
@@ -186,20 +185,20 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
         </Grid>
         <Grid item xs={12} md={1.75}>
           <TimePicker
-            onChange={val => handleConfirmChange(null, "start_time", val?.format("HH:mm") ?? "00:00")}
-            value={moment(newCheckInData.start_time, "HH:mm")}
+            onChange={val => handleChangeStartTime(val?.format(DEFAULT_TIME_FORMAT) ?? "00:00")}
+            value={moment(newCheckInData.start_time, DEFAULT_TIME_FORMAT)}
             renderInput={params => <TextField {...params} />}
             label="Start time"
-            inputFormat="HH:mm"
+            inputFormat={DEFAULT_TIME_FORMAT}
           />
         </Grid>
         <Grid item xs={12} md={1.75}>
           <TimePicker
-            onChange={val => setEndTime(val?.format("HH:mm") ?? "00:00")}
-            value={moment(endTime, "HH:mm")}
+            onChange={val => handleChangeEndTime(val?.format(DEFAULT_TIME_FORMAT) ?? "00:00")}
+            value={moment(endTime, DEFAULT_TIME_FORMAT)}
             renderInput={params => <TextField {...params} />}
             label="End time"
-            inputFormat="HH:mm"
+            inputFormat={DEFAULT_TIME_FORMAT}
           />
         </Grid>
         <Grid item xs={12} md={1.5}>
@@ -210,7 +209,7 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
             name="duration"
             value={newCheckInData.duration}
             inputMode="numeric"
-            onChange={handleChange}
+            onChange={e => handleChangeDuration(parseFloat(e.target.value))}
             onBlur={handleConfirmChange}
             error={!!formErrors.duration}
             helperText={formErrors.duration}

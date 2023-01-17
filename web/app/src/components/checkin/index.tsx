@@ -144,6 +144,7 @@ function CheckInView() {
                         <MenuList autoFocusItem>
                           {VIEW_OPTIONS.map(v => (
                             <MenuItem
+                              key={v.value}
                               selected={v.value === selectedPeriod.value}
                               onClick={() => {
                                 setSelectedPeriod(v);

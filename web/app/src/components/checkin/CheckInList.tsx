@@ -1,10 +1,11 @@
 import { Dispatch, SetStateAction } from "react";
 import { Delete } from "@mui/icons-material";
-import { Button, Grid, IconButton, List, ListItem, Pagination, Typography } from "@mui/material";
+import { Grid, IconButton, List, ListItem, Pagination, Typography } from "@mui/material";
 import moment from "moment";
 import api from "../../api";
 import { useSelector } from "../../store/hooks";
 import { selectCheckIns } from "../../store/timeSlice";
+import { DEFAULT_TIME_FORMAT } from "../../utils/constants";
 import NewCheckIn from "./NewCheckIn";
 
 interface CheckInListProps {
@@ -68,7 +69,7 @@ function CheckInList({ count, page, fetchCheckIns, tagCache, setPage }: CheckInL
                   </Typography>
                   <Typography variant="body1">{c.activities}</Typography>
                   <Typography variant="body1" ml={1}>
-                    ({moment(c.start_time, "HH:mm:ss").format("HH:mm")} -{" "}
+                    ({moment(c.start_time, "HH:mm:ss").format(DEFAULT_TIME_FORMAT)} -{" "}
                     {moment(c.start_time, "HH:mm:ss").add(c.duration, "hours").format("HH:mm")})
                   </Typography>
                 </Grid>
