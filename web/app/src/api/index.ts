@@ -3,6 +3,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import moment from "moment";
 import { useDispatch } from "../store/hooks";
 import { updateApiRequestLoading, updateGlobalNotification } from "../store/timeSlice";
+import { DEFAULT_DATE_FORMAT } from "../utils/constants";
 import { CheckInForm, CheckInResponse, PaginatedResponse, TextLogResponse } from "./types/checkIn";
 
 const baseURL = "/api";
@@ -11,14 +12,30 @@ const axi = axios.create({ baseURL, xsrfCookieName: "csrftoken", xsrfHeaderName:
 
 const api = {
   checkin: {
-    list(page: number = 1): Promise<AxiosResponse<PaginatedResponse<CheckInResponse[]>>> {
-      return axi.get(`/checkin?page=${page}`);
+    list(
+      page: number = 1,
+      startDate: string = moment().format(DEFAULT_DATE_FORMAT),
+      endDate?: string,
+    ): Promise<AxiosResponse<PaginatedResponse<CheckInResponse[]>>> {
+      const params = {
+        page,
+        start_date: startDate,
+        end_date: endDate ?? undefined,
+      };
+      return axi.get("/checkin", { params });
     },
     get(id: string): Promise<AxiosResponse<CheckInResponse>> {
       return axi.get(`/checkin/${id}`);
     },
-    log(recordDate: string = moment().format("YYYY-MM-DD")): Promise<AxiosResponse<TextLogResponse[]>> {
-      return axi.get(`/textLog?record_date=${recordDate}`);
+    log(
+      startDate: string = moment().format(DEFAULT_DATE_FORMAT),
+      endDate?: string,
+    ): Promise<AxiosResponse<TextLogResponse>> {
+      const params = {
+        start_date: startDate,
+        end_date: endDate ?? undefined,
+      };
+      return axi.get("/textLog", { params });
     },
     create(body: CheckInForm): Promise<AxiosResponse<CheckInResponse>> {
       return axi.post("/checkin", body);

@@ -12,14 +12,14 @@ interface GlobalNotification {
 
 export interface TimeState {
   checkIns: CheckInResponse[];
-  textLog: TextLogResponse[];
+  textLog: TextLogResponse;
   apiRequestLoading: boolean;
   globalNotification: GlobalNotification;
 }
 
 export const initialState: TimeState = {
   checkIns: [],
-  textLog: [],
+  textLog: {},
   apiRequestLoading: false,
   globalNotification: {
     type: "info",
@@ -35,7 +35,7 @@ export const timeSlice = createSlice({
     updateCheckIns(state, action: PayloadAction<CheckInResponse[]>) {
       state.checkIns = action.payload;
     },
-    updateTextLog(state, action: PayloadAction<TextLogResponse[]>) {
+    updateTextLog(state, action: PayloadAction<TextLogResponse>) {
       state.textLog = action.payload;
     },
     updateApiRequestLoading(state, action: PayloadAction<boolean>) {

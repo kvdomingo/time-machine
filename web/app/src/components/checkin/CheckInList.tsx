@@ -1,49 +1,22 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { Delete } from "@mui/icons-material";
 import { Button, Grid, IconButton, List, ListItem, Pagination, Typography } from "@mui/material";
 import moment from "moment";
 import api from "../../api";
-import { CheckInResponse } from "../../api/types/checkIn";
-import { useDispatch } from "../../store/hooks";
-import { updateCheckIns, updateTextLog } from "../../store/timeSlice";
+import { useSelector } from "../../store/hooks";
+import { selectCheckIns } from "../../store/timeSlice";
 import NewCheckIn from "./NewCheckIn";
 
 interface CheckInListProps {
-  checkIns: CheckInResponse[];
-  setSelectedTag: (tag: string) => void;
+  count: number;
+  page: number;
+  setPage: Dispatch<SetStateAction<number>>;
+  fetchCheckIns: (page?: number) => void;
+  tagCache: string[];
 }
 
-function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
-  const dispatch = useDispatch();
-  const [page, setPage] = useState(1);
-  const [count, setCount] = useState(0);
-  const [tagCache, setTagCache] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetchCheckIns();
-  }, []);
-
-  useEffect(() => {
-    setPage(1);
-  }, [checkIns]);
-
-  function fetchCheckIns(_page: number = page) {
-    api.checkin
-      .list(_page)
-      .then(res => {
-        dispatch(updateCheckIns(res.data.results));
-        setCount(res.data.count);
-        setTagCache([...new Set(res.data.results.map(c => c.tag))]);
-      })
-      .catch(err => console.error(err.message));
-
-    api.checkin
-      .log()
-      .then(res => {
-        dispatch(updateTextLog(res.data));
-      })
-      .catch(err => console.error(err.message));
-  }
+function CheckInList({ count, page, fetchCheckIns, tagCache, setPage }: CheckInListProps) {
+  const checkIns = useSelector(selectCheckIns);
 
   function handleDeleteCheckIn(id: string) {
     api.checkin
@@ -90,13 +63,9 @@ function CheckInList({ checkIns, setSelectedTag }: CheckInListProps) {
                   <Typography variant="body1">
                     {c.duration.toFixed(3)} {c.duration === 1 ? "hr" : "hrs"}{" "}
                   </Typography>
-                  <Button
-                    variant="text"
-                    sx={{ textTransform: "none", py: 0, px: 1 }}
-                    onClick={() => setSelectedTag(c.tag)}
-                  >
-                    <Typography variant="body1">#{c.tag}</Typography>
-                  </Button>{" "}
+                  <Typography variant="body1" mx={1} color="primary">
+                    #{c.tag}
+                  </Typography>
                   <Typography variant="body1">{c.activities}</Typography>
                   <Typography variant="body1" ml={1}>
                     ({moment(c.start_time, "HH:mm:ss").format("HH:mm")} -{" "}

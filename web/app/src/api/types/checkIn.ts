@@ -24,8 +24,10 @@ export interface PaginatedResponse<T> {
   results: T;
 }
 
-export interface TextLogResponse {
+export interface TextLogItem {
   tag: string;
   duration: number;
   activities: string[];
 }
+
+export type TextLogResponse = Record<string, TextLogItem[]>;

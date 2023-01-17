@@ -5,7 +5,6 @@ import {
   Button,
   ButtonGroup,
   ClickAwayListener,
-  FormControlLabel,
   Grid,
   Grow,
   IconButton,
@@ -13,94 +12,99 @@ import {
   MenuList,
   Paper,
   Popper,
-  Switch,
   TextField,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
-import { cloneDeep } from "lodash-es";
 import moment from "moment";
-import { useSelector } from "../../store/hooks";
-import { selectCheckIns, selectTextLog } from "../../store/timeSlice";
+import api from "../../api";
+import { useDispatch, useSelector } from "../../store/hooks";
+import { selectTextLog, updateCheckIns, updateTextLog } from "../../store/timeSlice";
 import { ViewOption } from "../../types/dateRangeViewOption";
+import { DEFAULT_DATE_FORMAT } from "../../utils/constants";
 import CheckInList from "./CheckInList";
 import TextLog from "./TextLog";
 
+const VIEW_OPTIONS: ViewOption[] = [
+  {
+    label: "Today",
+    value: "day",
+    start: moment().startOf("day"),
+    end: moment().endOf("day"),
+  },
+  {
+    label: "This week",
+    value: "week",
+    start: moment().startOf("isoWeek"),
+    end: moment().endOf("day"),
+  },
+  {
+    label: "This month",
+    value: "month",
+    start: moment().startOf("month"),
+    end: moment().endOf("day"),
+  },
+  {
+    label: "Custom",
+    value: "custom",
+    start: moment().startOf("day"),
+    end: moment().endOf("day"),
+  },
+];
+
 function CheckInView() {
-  const viewOptions: ViewOption[] = [
-    {
-      label: "Today",
-      value: "day",
-      start: moment().startOf("day"),
-      end: moment().endOf("day"),
-    },
-    {
-      label: "This week",
-      value: "week",
-      start: moment().startOf("isoWeek"),
-      end: moment().endOf("day"),
-    },
-    {
-      label: "This month",
-      value: "month",
-      start: moment().startOf("month"),
-      end: moment().endOf("day"),
-    },
-    {
-      label: "Custom",
-      value: "custom",
-      start: moment().startOf("day"),
-      end: moment().endOf("day"),
-    },
-  ];
-  const checkIns = useSelector(selectCheckIns);
   const textLog = useSelector(selectTextLog);
-  const [groupCheckInTags, setGroupCheckInTags] = useState(true);
-  const [filteredCheckIns, setFilteredCheckIns] = useState(cloneDeep(checkIns));
-  const [selectedPeriod, setSelectedPeriod] = useState<ViewOption>(viewOptions[0]);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const dispatch = useDispatch();
+  const [page, setPage] = useState(1);
+  const [count, setCount] = useState(0);
+  const [tagCache, setTagCache] = useState<string[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<ViewOption>(VIEW_OPTIONS[0]);
   const [openPeriodSelectMenu, setOpenPeriodSelectMenu] = useState(false);
   const [customRangeStart, setCustomRangeStart] = useState(moment().startOf("isoWeek"));
   const [customRangeEnd, setCustomRangeEnd] = useState(moment().endOf("day"));
   const periodSelectorRef = useRef<any>(null!);
 
   useEffect(() => {
-    let filtered: typeof checkIns;
-    switch (selectedPeriod.value) {
-      case "day": {
-        filtered = checkIns.filter(
-          c =>
-            moment(c.created).isSameOrAfter(selectedPeriod.start) &&
-            moment(c.created).isSameOrBefore(selectedPeriod.end),
-        );
-        break;
-      }
-      case "week": {
-        filtered = checkIns.filter(c => moment(c.created).isSameOrAfter(selectedPeriod.start));
-        break;
-      }
-      case "month": {
-        filtered = checkIns.filter(c => moment(c.created).isSameOrAfter(selectedPeriod.start));
-        break;
-      }
-      case "custom": {
-        filtered = checkIns.filter(
-          c => moment(c.created).isSameOrAfter(customRangeStart) && moment(c.created).isSameOrBefore(customRangeEnd),
-        );
-        break;
-      }
-      default: {
-        filtered = cloneDeep(checkIns);
-        break;
-      }
-    }
-    filtered = filtered.filter(f => (!!selectedTag ? f.tag === selectedTag : true));
-    setFilteredCheckIns(filtered);
-  }, [selectedPeriod.value, checkIns, customRangeStart, customRangeEnd, selectedTag]);
+    fetchCheckIns();
+  }, [selectedPeriod]);
 
-  useEffect(() => {}, [checkIns]);
+  function fetchCheckIns(_page: number = page) {
+    api.checkin
+      .list(
+        _page,
+        selectedPeriod.value === "custom"
+          ? customRangeStart.format(DEFAULT_DATE_FORMAT)
+          : selectedPeriod.start.format(DEFAULT_DATE_FORMAT),
+        selectedPeriod.value === "custom"
+          ? customRangeEnd.format(DEFAULT_DATE_FORMAT)
+          : selectedPeriod.end.format(DEFAULT_DATE_FORMAT),
+      )
+      .then(res => {
+        dispatch(updateCheckIns(res.data.results));
+        setCount(res.data.count);
+        setTagCache([...new Set(res.data.results.map(c => c.tag))]);
+      })
+      .catch(err => console.error(err.message));
+
+    api.checkin
+      .log(
+        selectedPeriod.value === "custom"
+          ? customRangeStart.format(DEFAULT_DATE_FORMAT)
+          : selectedPeriod.start.format(DEFAULT_DATE_FORMAT),
+        selectedPeriod.value === "custom"
+          ? customRangeEnd.format(DEFAULT_DATE_FORMAT)
+          : selectedPeriod.end.format(DEFAULT_DATE_FORMAT),
+      )
+      .then(res => {
+        dispatch(updateTextLog(res.data));
+      })
+      .catch(err => console.error(err.message));
+  }
 
   function calculateCheckInHours() {
-    return textLog.map(t => t.duration).reduce((acc, val) => acc + val, 0);
+    return Object.values(textLog)
+      .flat()
+      .map(t => t.duration)
+      .reduce((acc, val) => acc + val, 0);
   }
 
   return (
@@ -121,20 +125,6 @@ function CheckInView() {
                   View: {selectedPeriod.label}
                 </Button>
               </ButtonGroup>
-              {!!selectedTag && (
-                <ButtonGroup variant="text">
-                  <Button
-                    startIcon={<FilterAlt />}
-                    endIcon={
-                      <IconButton size="small" onClick={() => setSelectedTag(null)}>
-                        <Clear />
-                      </IconButton>
-                    }
-                  >
-                    Filter: #{selectedTag}
-                  </Button>
-                </ButtonGroup>
-              )}
               <Popper
                 open={openPeriodSelectMenu}
                 anchorEl={periodSelectorRef.current}
@@ -152,7 +142,7 @@ function CheckInView() {
                     <Paper>
                       <ClickAwayListener onClickAway={() => setOpenPeriodSelectMenu(false)}>
                         <MenuList autoFocusItem>
-                          {viewOptions.map(v => (
+                          {VIEW_OPTIONS.map(v => (
                             <MenuItem
                               selected={v.value === selectedPeriod.value}
                               onClick={() => {
@@ -191,25 +181,14 @@ function CheckInView() {
             )}
           </Grid>
         </Grid>
-        <Grid container item md={4} alignItems="center">
-          <Grid item xs>
-            Going on{" "}
-            <b>
-              {calculateCheckInHours()} hour{calculateCheckInHours() !== 1 && "s"}
-            </b>
-          </Grid>
-          <Grid item xs container justifyContent="flex-end">
-            <FormControlLabel
-              control={<Switch checked={groupCheckInTags} onChange={e => setGroupCheckInTags(e.target.checked)} />}
-              label="Group similar"
-            />
-          </Grid>
+        <Grid item md={4}>
+          Going on{" "}
+          <b>
+            {calculateCheckInHours().toFixed(2)} hour{calculateCheckInHours() !== 1 && "s"}
+          </b>
         </Grid>
         <Grid item md={8}>
-          <CheckInList
-            checkIns={filteredCheckIns}
-            setSelectedTag={tag => setSelectedTag(prevTag => (prevTag === tag ? null : tag))}
-          />
+          <CheckInList count={count} page={page} setPage={setPage} fetchCheckIns={fetchCheckIns} tagCache={tagCache} />
         </Grid>
         <Grid item md={4}>
           {/*<Stats checkIns={filteredCheckIns} byTag={!!selectedTag} />*/}

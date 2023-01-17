@@ -5,6 +5,7 @@ import { TimePicker } from "@mui/x-date-pickers";
 import moment from "moment";
 import api from "../../api";
 import { CheckInForm } from "../../api/types/checkIn";
+import { DEFAULT_DATE_FORMAT } from "../../utils/constants";
 
 enum CheckInStatus {
   OK = "",
@@ -22,7 +23,7 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
   const initialCheckIn: CheckInForm = {
     duration: 0,
     start_time: moment().format("HH:mm"),
-    record_date: moment().format("YYYY-MM-DD"),
+    record_date: moment().format(DEFAULT_DATE_FORMAT),
     tag: "",
     activities: "",
   };
