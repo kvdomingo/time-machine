@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Add, Check, Close } from "@mui/icons-material";
 import { Autocomplete, Button, Grid, IconButton, TextField } from "@mui/material";
 import { TimePicker } from "@mui/x-date-pickers";
 import moment from "moment";
 import api from "../../api";
-import { CheckInForm } from "../../api/types/checkIn";
+import { CheckInForm, CheckInResponse } from "../../api/types/checkIn";
+import useFetchCheckIns from "../../hooks/useFetchCheckIns";
+import { useSelector } from "../../store/hooks";
+import { selectTagCache } from "../../store/timeSlice";
 import { DEFAULT_DATE_FORMAT, DEFAULT_TIME_FORMAT } from "../../utils/constants";
 
 enum CheckInStatus {
@@ -14,17 +17,18 @@ enum CheckInStatus {
 }
 
 interface NewCheckInProps {
-  fetchCheckIns: () => void;
-  tagCache: string[];
+  isEditing: boolean;
+  stopEditing: () => void;
+  editingProps?: CheckInResponse;
 }
 
-function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
+function CheckInAddEdit({ isEditing, stopEditing, editingProps }: NewCheckInProps) {
   const initialCheckIn: CheckInForm = {
-    duration: 0,
-    start_time: moment().format(DEFAULT_TIME_FORMAT),
-    record_date: moment().format(DEFAULT_DATE_FORMAT),
-    tag: "",
-    activities: "",
+    duration: isEditing ? editingProps!.duration : 0,
+    start_time: isEditing ? editingProps!.start_time : moment().format(DEFAULT_TIME_FORMAT),
+    record_date: isEditing ? editingProps!.record_date : moment().format(DEFAULT_DATE_FORMAT),
+    tag: isEditing ? editingProps!.tag : "",
+    activities: isEditing ? editingProps!.activities : "",
   };
   const initialErrors: { [key in keyof CheckInForm]: CheckInStatus } = {
     duration: CheckInStatus.OK,
@@ -34,20 +38,19 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
     activities: CheckInStatus.OK,
   };
 
-  const [endTime, setEndTime] = useState(moment().format(DEFAULT_TIME_FORMAT));
+  const tagCache = useSelector(selectTagCache);
+  const fetchCheckIns = useFetchCheckIns();
+  const [endTime, setEndTime] = useState(
+    isEditing
+      ? moment(editingProps!.start_time, DEFAULT_TIME_FORMAT)
+          .add(editingProps!.duration, "hours")
+          .format(DEFAULT_TIME_FORMAT)
+      : moment().format(DEFAULT_TIME_FORMAT),
+  );
   const [newCheckInData, setNewCheckInData] = useState({ ...initialCheckIn });
   const [formErrors, setFormErrors] = useState<typeof initialErrors>({ ...initialErrors });
-  const [creating, setCreating] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [tagInputValue, setTagInputValue] = useState("");
-  const autoUpdateRef = useRef<NodeJS.Timer>(
-    setInterval(() => handleChangeEndTime(moment().format(DEFAULT_TIME_FORMAT)), 60 * 1000),
-  );
-
-  useEffect(() => {
-    return () => {
-      clearTimeout(autoUpdateRef.current);
-    };
-  }, []);
 
   function handleChange(e: any, _name?: string, _value?: string | null) {
     let name = _name != null ? _name : e.target.name;
@@ -126,6 +129,10 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
     return errors;
   }
 
+  function handleSubmit(e: any) {
+    isEditing ? handleEditCheckIn(e) : handleCreateCheckIn(e);
+  }
+
   function handleCreateCheckIn(e: any) {
     e.preventDefault();
     const errors = validateForm();
@@ -134,14 +141,28 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
       .create(newCheckInData)
       .then(() => {
         fetchCheckIns();
-        setCreating(false);
+        setIsCreating(false);
         setNewCheckInData({ ...initialCheckIn });
       })
       .catch(err => console.error(err));
   }
 
-  return creating ? (
-    <form onSubmit={handleCreateCheckIn}>
+  function handleEditCheckIn(e: any) {
+    e.preventDefault();
+    const errors = validateForm();
+    if (Object.values(errors).some(Boolean)) return;
+    api.checkin
+      .update(editingProps!.id, newCheckInData)
+      .then(() => {
+        fetchCheckIns();
+        stopEditing();
+        setNewCheckInData({ ...initialCheckIn });
+      })
+      .catch(err => console.error(err));
+  }
+
+  return isCreating || isEditing ? (
+    <form onSubmit={handleSubmit}>
       <Grid container spacing={1}>
         <Grid item xs={12} md={2}>
           <Autocomplete
@@ -220,12 +241,12 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
           <IconButton
             onClick={() => {
               setNewCheckInData({ ...initialCheckIn });
-              setCreating(false);
+              isEditing ? stopEditing() : setIsCreating(false);
             }}
           >
             <Close />
           </IconButton>
-          <IconButton type="submit" onClick={() => handleCreateCheckIn}>
+          <IconButton type="submit" onClick={handleSubmit}>
             <Check />
           </IconButton>
         </Grid>
@@ -233,11 +254,16 @@ function NewCheckIn({ fetchCheckIns, tagCache }: NewCheckInProps) {
     </form>
   ) : (
     <Grid container justifyContent="center">
-      <Button variant="text" color="primary" startIcon={<Add />} onClick={() => setCreating(true)}>
+      <Button variant="text" color="primary" startIcon={<Add />} onClick={() => setIsCreating(true)}>
         Check In
       </Button>
     </Grid>
   );
 }
 
-export default NewCheckIn;
+CheckInAddEdit.defaultProps = {
+  isEditing: false,
+  stopEditing: () => {},
+};
+
+export default CheckInAddEdit;

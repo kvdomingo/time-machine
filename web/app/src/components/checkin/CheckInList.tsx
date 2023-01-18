@@ -1,30 +1,20 @@
 import { Dispatch, SetStateAction } from "react";
-import { Delete } from "@mui/icons-material";
-import { Grid, IconButton, List, ListItem, Pagination, Typography } from "@mui/material";
-import moment from "moment";
-import api from "../../api";
+import { Grid, List, ListItem, Pagination } from "@mui/material";
+import useFetchCheckIns from "../../hooks/useFetchCheckIns";
 import { useSelector } from "../../store/hooks";
-import { selectCheckIns } from "../../store/timeSlice";
-import { DEFAULT_TIME_FORMAT } from "../../utils/constants";
-import NewCheckIn from "./NewCheckIn";
+import { selectCheckIns, selectCount } from "../../store/timeSlice";
+import CheckInAddEdit from "./CheckInAddEdit";
+import CheckInItem from "./CheckInItem";
 
 interface CheckInListProps {
-  count: number;
   page: number;
   setPage: Dispatch<SetStateAction<number>>;
-  fetchCheckIns: (page?: number) => void;
-  tagCache: string[];
 }
 
-function CheckInList({ count, page, fetchCheckIns, tagCache, setPage }: CheckInListProps) {
+function CheckInList({ page, setPage }: CheckInListProps) {
   const checkIns = useSelector(selectCheckIns);
-
-  function handleDeleteCheckIn(id: string) {
-    api.checkin
-      .delete(id)
-      .then(() => fetchCheckIns())
-      .catch(err => console.error(err.message));
-  }
+  const fetchCheckIns = useFetchCheckIns();
+  const count = useSelector(selectCount);
 
   function handlePageChange(e: any, page: number) {
     setPage(page);
@@ -49,38 +39,10 @@ function CheckInList({ count, page, fetchCheckIns, tagCache, setPage }: CheckInL
         }}
       >
         <ListItem>
-          <NewCheckIn fetchCheckIns={fetchCheckIns} tagCache={tagCache} />
+          <CheckInAddEdit />
         </ListItem>
         {checkIns.length > 0 ? (
-          checkIns.map(c => (
-            <ListItem key={c.id}>
-              <Grid container alignItems="center">
-                <Grid item xs={12} md={1}>
-                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                    {moment(c.created).format("MM/DD")}
-                  </Typography>
-                </Grid>
-                <Grid item xs md container alignItems="center">
-                  <Typography variant="body1">
-                    {c.duration.toFixed(3)} {c.duration === 1 ? "hr" : "hrs"}{" "}
-                  </Typography>
-                  <Typography variant="body1" mx={1} color="primary">
-                    #{c.tag}
-                  </Typography>
-                  <Typography variant="body1">{c.activities}</Typography>
-                  <Typography variant="body1" ml={1}>
-                    ({moment(c.start_time, "HH:mm:ss").format(DEFAULT_TIME_FORMAT)} -{" "}
-                    {moment(c.start_time, "HH:mm:ss").add(c.duration, "hours").format("HH:mm")})
-                  </Typography>
-                </Grid>
-                <Grid item xs={2} md={2} container justifyContent={{ md: "flex-end" }}>
-                  <IconButton color="error" onClick={() => handleDeleteCheckIn(c.id)} size="small">
-                    <Delete />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            </ListItem>
-          ))
+          checkIns.map(c => <CheckInItem checkIn={c} key={c.id} />)
         ) : (
           <ListItem sx={{ color: "text.secondary" }}>No check ins within the selected time period</ListItem>
         )}
