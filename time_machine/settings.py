@@ -19,7 +19,7 @@ import dj_database_url
 from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 
-from .utils import get_database_connection, get_jwks, load_env
+from .utils import get_jwks, load_env
 
 load_dotenv()
 
@@ -107,6 +107,13 @@ WSGI_APPLICATION = "time_machine.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
+
+
+def get_database_connection():
+    user = os.environ.get("POSTGRESQL_USERNAME")
+    db = os.environ.get("POSTGRESQL_DATABASE")
+    return f"postgres://{user}@postgres:5432/{db}"
+
 
 DATABASES = {"default": dj_database_url.parse(get_database_connection())}
 

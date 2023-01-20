@@ -56,9 +56,9 @@ services:
   postgres:
     image: bitnami/postgresql:13
     environment:
-      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
-      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
       - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
+      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+      - ALLOW_EMPTY_PASSWORD=yes
     volumes:
       - db-data:/bitnami/postgresql
 

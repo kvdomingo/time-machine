@@ -26,6 +26,8 @@ psycopg2-binary = "^2.9.5"
 [tool.poetry.group.dev.dependencies]
 black = "^22.6.0"
 isort = "^5.10.1"
+google-cloud-secret-manager = "^2.15.0"
+mako = "^1.2.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

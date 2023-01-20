@@ -12,19 +12,14 @@ tasks:
     desc: Build and start containers
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml up -d --build --remove-orphans {{.CLI_ARGS}}
-      - task logs
 
-  frontend-start:
-    desc: Start frontend
-    dir: web/app
+  setup:
+    desc: Run initial setup
+    interactive: true
     cmds:
-      - yarn install
-      - yarn start
-
-  backend-start:
-    desc: Start backend
-    cmds:
-      - poetry run python manage.py runserver 127.0.0.1:5000
+      - poetry install
+      - poetry run python -m scripts.make_dotenv dev
+      - poetry run python -m scripts.make_dotenvrc dev
 
   reload-proxy:
     desc: Reload proxy config
