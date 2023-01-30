@@ -1,3 +1,4 @@
+PYTHON_ENV=development
 PYTHONUNBUFFERED=true
 PYTHONIOENCODING=utf-8
 DJANGO_SETTINGS_MODULE=time_machine.settings

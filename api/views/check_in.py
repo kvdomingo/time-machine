@@ -27,6 +27,17 @@ class CheckInViewSet(ModelViewSet):
     filterset_class = CheckInFilter
 
 
+class TagViewSet(GenericViewSet):
+    queryset = CheckIn.objects.all()
+    pagination_class = None
+
+    def list(self, request: RESTRequest):
+        queryset: QuerySet[CheckIn] = self.get_queryset()
+        qs_unique_tags = queryset.all().values_list("tag", flat=True)
+        response = sorted(list(set(qs_unique_tags)))
+        return Response(response)
+
+
 class TextLogViewSet(GenericViewSet):
     queryset = CheckIn.objects.all()
     serializer_class = CheckInSerializer

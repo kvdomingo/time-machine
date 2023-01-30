@@ -47,6 +47,11 @@ const api = {
       return axi.delete(`/checkin/${id}`);
     },
   },
+  tagCache: {
+    list(): Promise<AxiosResponse<string[]>> {
+      return axi.get("/tag");
+    },
+  },
 };
 
 export default api;

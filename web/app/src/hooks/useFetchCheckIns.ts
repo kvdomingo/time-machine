@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import api from "../api";
 import { useDispatch, useSelector } from "../store/hooks";
 import {
@@ -21,7 +20,6 @@ export default function useFetchCheckIns() {
       .then(res => {
         dispatch(updateCheckIns(res.data.results));
         dispatch(updateCount(res.data.count));
-        dispatch(updateTagCache([...new Set(res.data.results.map(c => c.tag))]));
       })
       .catch(err => console.error(err.message));
 
@@ -29,6 +27,13 @@ export default function useFetchCheckIns() {
       .log(startDate, endDate)
       .then(res => {
         dispatch(updateTextLog(res.data));
+      })
+      .catch(err => console.error(err.message));
+
+    api.tagCache
+      .list()
+      .then(res => {
+        dispatch(updateTagCache(res.data));
       })
       .catch(err => console.error(err.message));
   }
