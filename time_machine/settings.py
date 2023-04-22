@@ -111,8 +111,9 @@ WSGI_APPLICATION = "time_machine.wsgi.application"
 
 def get_database_connection():
     user = os.environ.get("POSTGRESQL_USERNAME")
+    password = os.environ.get("POSTGRESQL_PASSWORD")
     db = os.environ.get("POSTGRESQL_DATABASE")
-    return f"postgres://{user}@db:5432/{db}"
+    return f"postgres://{user}:{password}@db:5432/{db}"
 
 
 DATABASES = {"default": dj_database_url.parse(get_database_connection())}
