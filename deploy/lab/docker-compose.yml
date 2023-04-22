@@ -1,0 +1,44 @@
+services:
+  backend:
+    build:
+      context: ../..
+      target: prod
+    image: gitea.local.kvdomingo.dev/kvdomingo/time-machine:latest
+    env_file: .env
+    restart: unless-stopped
+    networks:
+       - default
+       - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${APP_SLUG}.entrypoints=http"
+      - "traefik.http.routers.${APP_SLUG}.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`)"
+      - "traefik.http.middlewares.${APP_SLUG}-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.${APP_SLUG}.middlewares=${APP_SLUG}-https-redirect"
+      - "traefik.http.routers.${APP_SLUG}-secure.entrypoints=https"
+      - "traefik.http.routers.${APP_SLUG}-secure.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`)"
+      - "traefik.http.routers.${APP_SLUG}-secure.tls=true"
+      - "traefik.http.routers.${APP_SLUG}-secure.service=${APP_SLUG}"
+      - "traefik.http.services.${APP_SLUG}.loadbalancer.server.port=${PORT}"
+      - "traefik.docker.network=proxy"
+    depends_on:
+      - db
+
+  db:
+    image: bitnami/postgresql:13
+    environment:
+      POSTGRESQL_USERNAME: ${POSTGRESQL_USERNAME}
+      POSTGRESQL_PASSWORD: ${POSTGRESQL_POSTGRESQL_PASSWORD}
+      POSTGRESQL_DATABASE: ${POSTGRESQL_DATABASE}
+    restart: unless-stopped
+    networks:
+      - default
+    volumes:
+      - db-data:/bitnami/postgresql
+
+volumes:
+  db-data: {}
+
+networks:
+  proxy:
+    external: true
