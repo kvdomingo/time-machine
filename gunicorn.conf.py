@@ -5,5 +5,5 @@ workers = 1
 
 errorlog = "-"
 accesslog = "-"
-loglevel = "debug"
+loglevel = "info"
 capture_output = True

@@ -4,6 +4,19 @@ services:
       context: ../..
       target: prod
     image: gitea.local.kvdomingo.dev/kvdomingo/time-machine:latest
+    environment:
+      DJANGO_SETTINGS_MODULE: time_machine.settings
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
+      POSTGRESQL_USERNAME: ${POSTGRESQL_USERNAME}
+      POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD}
+      POSTGRESQL_DATABASE: ${POSTGRESQL_DATABASE}
+      POSTGRESQL_HOST: db
+      POSTGRESQL_PORT: 5432
+      DATABASE_URL: ${POSTGRESQL_USERNAME}:${POSTGRESQL_PASSWORD}@db:5432/${POSTGRESQL_DATABASE}
+      PORT: ${PORT}
     restart: unless-stopped
     networks:
        - default
@@ -15,7 +28,7 @@ services:
       - "traefik.http.middlewares.${APP_SLUG}-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.routers.${APP_SLUG}.middlewares=${APP_SLUG}-https-redirect"
       - "traefik.http.routers.${APP_SLUG}-secure.entrypoints=https"
-      - "traefik.http.routers.${APP_SLUG}-secure.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`)"
+      - "traefik.http.routers.${APP_SLUG}-secure.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`) || Host(`${APP_SLUG}.kvdomingo.dev`)"
       - "traefik.http.routers.${APP_SLUG}-secure.tls=true"
       - "traefik.http.routers.${APP_SLUG}-secure.service=${APP_SLUG}"
       - "traefik.http.services.${APP_SLUG}.loadbalancer.server.port=${PORT}"

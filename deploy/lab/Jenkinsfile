@@ -16,7 +16,6 @@ def piholePassword = [
   vaultString(credentialsId: '5850fc91-b363-41c2-914f-584e5e99df9c', variable: 'PIHOLE_PASSWORD')
 ]
 
-def PORT = 5000
 def PYTHON_ENV = "lab"
 def DJANGO_SETTINGS_MODULE = "time_machine.settings"
 def DATABASE_HOST = "db"
@@ -30,12 +29,26 @@ pipeline {
   stages {
     stage("Verify Tooling") {
       steps {
-        sh '''
-          echo "Verifying tooling..."
-          docker info
-          docker version
-          docker compose version
-        '''
+        withVault([vaultSecrets: vaultSecrets]) {
+          withEnv([
+            "APP_SLUG=${APP_SLUG}",
+            "PORT=5000",
+            "PYTHON_ENV=${PYTHON_ENV}",
+            "DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}",
+            "POSTGRESQL_HOST=${DATABASE_HOST}",
+            "POSTGRESQL_PORT=${DATABASE_PORT}",
+            "POSTGRESQL_DATABASE=${DATABASE_NAME}",
+            'DATABASE_URL="${POSTGRESQL_USERNAME}:${POSTGRESQL_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"'
+          ]) {
+            sh '''
+              echo "Verifying tooling..."
+              docker info
+              docker version
+              docker compose version
+              docker compose -p ${APP_SLUG} -f deploy/lab/docker-compose.yml config
+            '''
+          }
+        }
       }
     }
 
@@ -44,7 +57,7 @@ pipeline {
         withVault([vaultSecrets: vaultSecrets]) {
           withEnv([
             "APP_SLUG=${APP_SLUG}",
-            "PORT=${PORT}",
+            "PORT=5000",
             "PYTHON_ENV=${PYTHON_ENV}",
             "DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}",
             "POSTGRESQL_HOST=${DATABASE_HOST}",
