@@ -1,11 +1,65 @@
-pipeline{
-    agent any
+def vaultSecrets = [
+  [
+    path: 'kv/time-machine/lab',
+    secretValues: [
+      [vaultKey: "DJANGO_SECRET_KEY"],
+      [vaultKey: "DJANGO_SUPERUSER_EMAIL"],
+      [vaultKey: "DJANGO_SUPERUSER_PASSWORD"],
+      [vaultKey: "DJANGO_SUPERUSER_USERNAME"],
+      [vaultKey: "POSTGRESQL_PASSWORD"],
+      [vaultKey: "POSTGRESQL_USERNAME"]
+    ]
+  ]
+]
 
-    stages{
-        stage("deploy") {
-            steps {
-                echo "Begin deploy..."
-            }
-        }
+def piholePassword = [
+  vaultString(credentialsId: '5850fc91-b363-41c2-914f-584e5e99df9c', variable: 'PIHOLE_PASSWORD')
+]
+
+def PORT = 5000
+def PYTHON_ENV = "lab"
+def DJANGO_SETTINGS_MODULE = "time_machine.settings"
+def DATABASE_HOST = "db"
+def DATABASE_NAME = "timemachine"
+def DATABASE_PORT = 5432
+def APP_SLUG = "time-machine"
+
+pipeline {
+  agent any
+
+  stages {
+    stage("Verify Tooling") {
+      steps {
+        sh '''
+          echo "Verifying tooling..."
+          docker info
+          docker version
+          docker compose version
+        '''
+      }
     }
+
+    stage("Deploy") {
+      steps {
+        withVault([vaultSecrets: vaultSecrets]) {
+          withEnv([
+            "APP_SLUG=${APP_SLUG}",
+            "PORT=${PORT}",
+            "PYTHON_ENV=${PYTHON_ENV}",
+            "DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}",
+            "POSTGRESQL_HOST=${DATABASE_HOST}",
+            "POSTGRESQL_PORT=${DATABASE_PORT}",
+            "POSTGRESQL_DATABASE=${DATABASE_NAME}",
+            'DATABASE_URL="${POSTGRESQL_USERNAME}:${POSTGRESQL_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"'
+          ]) {
+            sh '''
+              echo "Deploying..."
+              docker build -t gitea.local.kvdomingo.dev/kvdomingo/${APP_SLUG}:latest --target prod --network host .
+              docker compose -p ${APP_SLUG} -f deploy/lab/docker-compose.yml up -d --remove-orphans
+            '''
+          }
+        }
+      }
+    }
+  }
 }
