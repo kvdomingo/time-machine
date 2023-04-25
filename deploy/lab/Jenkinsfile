@@ -20,6 +20,17 @@ def DATABASE_NAME = "timemachine"
 def DATABASE_PORT = 5432
 def APP_SLUG = "time-machine"
 
+def envs = [
+  "APP_SLUG=${APP_SLUG}",
+  "PORT=${PORT}",
+  "PYTHON_ENV=${PYTHON_ENV}",
+  "DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}",
+  "POSTGRESQL_HOST=${DATABASE_HOST}",
+  "POSTGRESQL_PORT=${DATABASE_PORT}",
+  "POSTGRESQL_DATABASE=${DATABASE_NAME}",
+  'DATABASE_URL="${POSTGRESQL_USERNAME}:${POSTGRESQL_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"'
+]
+
 pipeline {
   agent any
 
@@ -27,22 +38,26 @@ pipeline {
     stage("Verify Tooling") {
       steps {
         withVault([vaultSecrets: vaultSecrets]) {
-          withEnv([
-            "APP_SLUG=${APP_SLUG}",
-            "PORT=${PORT}",
-            "PYTHON_ENV=${PYTHON_ENV}",
-            "DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}",
-            "POSTGRESQL_HOST=${DATABASE_HOST}",
-            "POSTGRESQL_PORT=${DATABASE_PORT}",
-            "POSTGRESQL_DATABASE=${DATABASE_NAME}",
-            'DATABASE_URL="${POSTGRESQL_USERNAME}:${POSTGRESQL_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"'
-          ]) {
+          withEnv(envs) {
             sh '''
               echo "Verifying tooling..."
               docker info
               docker version
               docker compose version
-              docker compose -p ${APP_SLUG} -f deploy/lab/docker-compose.yml config
+              docker compose --project-name ${APP_SLUG} --file deploy/lab/docker-compose.yml config
+            '''
+          }
+        }
+      }
+    }
+
+    stage("Build") {
+      steps {
+        withVault([vaultSecrets: vaultSecrets]) {
+          withEnv(envs) {
+            sh '''
+              echo "Building..."
+              docker compose --project-name ${APP_SLUG} --file deploy/lab/docker-compose.yml build --no-cache
             '''
           }
         }
@@ -52,22 +67,9 @@ pipeline {
     stage("Deploy") {
       steps {
         withVault([vaultSecrets: vaultSecrets]) {
-          withEnv([
-            "APP_SLUG=${APP_SLUG}",
-            "PORT=${PORT}",
-            "PYTHON_ENV=${PYTHON_ENV}",
-            "DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}",
-            "POSTGRESQL_HOST=${DATABASE_HOST}",
-            "POSTGRESQL_PORT=${DATABASE_PORT}",
-            "POSTGRESQL_DATABASE=${DATABASE_NAME}",
-            'DATABASE_URL="${POSTGRESQL_USERNAME}:${POSTGRESQL_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"',
-            'APP_NAME="Time Machine"',
-            "HOMEPAGE_GROUP=Service",
-            'HOMEPAGE_ICON=""'
-          ]) {
+          withEnv(envs) {
             sh '''
               echo "Deploying..."
-              docker build -t gitea.local.kvdomingo.dev/kvdomingo/${APP_SLUG}:latest --target prod --network host .
               docker compose --project-name ${APP_SLUG} --file deploy/lab/docker-compose.yml up --detach --remove-orphans
             '''
           }

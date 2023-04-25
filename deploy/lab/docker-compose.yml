@@ -16,12 +16,18 @@ services:
       POSTGRESQL_HOST: db
       POSTGRESQL_PORT: 5432
       DATABASE_URL: ${POSTGRESQL_USERNAME}:${POSTGRESQL_PASSWORD}@db:5432/${POSTGRESQL_DATABASE}
-      PORT: ${PORT}
     restart: unless-stopped
-    networks:
-       - default
     depends_on:
       - db
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - "-f"
+        - "http://web:5000/health"
+      interval: 15s
+      timeout: 10s
+      retries: 3
 
   db:
     image: bitnami/postgresql:13
@@ -30,15 +36,13 @@ services:
       POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD}
       POSTGRESQL_DATABASE: ${POSTGRESQL_DATABASE}
     restart: unless-stopped
-    networks:
-      - default
     volumes:
       - db-data:/bitnami/postgresql
 
   proxy:
     image: bitnami/nginx:latest
     environment:
-      - NGINX_HTTP_PORT_NUMBER=8001
+      - NGINX_HTTP_PORT_NUMBER=${PORT}
     volumes:
       - ./proxy:/opt/bitnami/nginx/conf/server_blocks:ro
     restart: on-failure

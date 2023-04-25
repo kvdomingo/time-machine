@@ -2,9 +2,8 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 from rest_framework.schemas import get_schema_view
 
+from api.views import CheckInViewSet, TagViewSet, TextLogViewSet, health
 from time_machine import __version__
-
-from .views import CheckInViewSet, TagViewSet, TextLogViewSet
 
 router = SimpleRouter(trailing_slash=False)
 router.register("checkin", CheckInViewSet)
@@ -20,5 +19,6 @@ urlpatterns = [
         ),
         name="openapi-schema",
     ),
+    path("health", health),
     *router.urls,
 ]

@@ -4,6 +4,5 @@ worker_class = "gevent"
 workers = 1
 
 errorlog = "-"
-accesslog = "-"
-loglevel = "info"
+loglevel = "debug"
 capture_output = True
