@@ -20,19 +20,6 @@ services:
     restart: unless-stopped
     networks:
        - default
-       - proxy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.${APP_SLUG}.entrypoints=http"
-      - "traefik.http.routers.${APP_SLUG}.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`)"
-      - "traefik.http.middlewares.${APP_SLUG}-https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.${APP_SLUG}.middlewares=${APP_SLUG}-https-redirect"
-      - "traefik.http.routers.${APP_SLUG}-secure.entrypoints=https"
-      - "traefik.http.routers.${APP_SLUG}-secure.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`) || Host(`${APP_SLUG}.kvdomingo.dev`)"
-      - "traefik.http.routers.${APP_SLUG}-secure.tls=true"
-      - "traefik.http.routers.${APP_SLUG}-secure.service=${APP_SLUG}"
-      - "traefik.http.services.${APP_SLUG}.loadbalancer.server.port=${PORT}"
-      - "traefik.docker.network=proxy"
     depends_on:
       - db
 
@@ -47,6 +34,36 @@ services:
       - default
     volumes:
       - db-data:/bitnami/postgresql
+
+  proxy:
+    image: bitnami/nginx:latest
+    environment:
+      - NGINX_HTTP_PORT_NUMBER=8001
+    volumes:
+      - ./proxy:/opt/bitnami/nginx/conf/server_blocks:ro
+    restart: on-failure
+    networks:
+      - default
+      - proxy
+    depends_on:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${APP_SLUG}.entrypoints=http"
+      - "traefik.http.routers.${APP_SLUG}.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`)"
+      - "traefik.http.middlewares.${APP_SLUG}-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.${APP_SLUG}.middlewares=${APP_SLUG}-https-redirect"
+      - "traefik.http.routers.${APP_SLUG}-secure.entrypoints=https"
+      - "traefik.http.routers.${APP_SLUG}-secure.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`) || Host(`${APP_SLUG}.kvdomingo.dev`)"
+      - "traefik.http.routers.${APP_SLUG}-secure.tls=true"
+      - "traefik.http.routers.${APP_SLUG}-secure.service=${APP_SLUG}"
+      - "traefik.http.services.${APP_SLUG}.loadbalancer.server.port=${PORT}"
+      - "traefik.docker.network=proxy"
+      - "homepage.group=${HOMEPAGE_GROUP}"
+      - "homepage.name=${APP_NAME}"
+      - "homepage.icon=${HOMEPAGE_ICON}"
+      - "homepage.href=https://${APP_SLUG}.local.kvdomingo.dev"
+      - "homepage.ping=https://${APP_SLUG}.local.kvdomingo.dev"
 
 volumes:
   db-data: {}
