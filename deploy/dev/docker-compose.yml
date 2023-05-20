@@ -9,6 +9,7 @@ services:
     build:
       context: ../..
       target: dev
+      dockerfile: Dockerfile.dev
     image: kvdomingo/time-machine-api:latest
     env_file: .env
     volumes:

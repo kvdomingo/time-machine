@@ -12,23 +12,27 @@ def vaultSecrets = [
   ]
 ]
 
-def PORT = 8000
-def PYTHON_ENV = "lab"
-def DJANGO_SETTINGS_MODULE = "time_machine.settings"
-def DATABASE_HOST = "db"
-def DATABASE_NAME = "timemachine"
-def DATABASE_PORT = 5432
 def APP_SLUG = "time-machine"
+def APP_NAME = "Time Machine"
+def HOMEPAGE_GROUP = "Background Services"
+def HOMEPAGE_ICON = ""
+def PORT = "8000"
+def DATABASE_NAME = "timemachine"
+def DATABASE_HOST = "db"
+def DATABASE_PORT = "5432"
+def DJANGO_SETTINGS_MODULE = "time_machine.settings"
+def PYTHON_ENV = "lab"
 
 def envs = [
-  "APP_SLUG=${APP_SLUG}",
-  "PORT=${PORT}",
   "PYTHON_ENV=${PYTHON_ENV}",
-  "DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}",
-  "POSTGRESQL_HOST=${DATABASE_HOST}",
-  "POSTGRESQL_PORT=${DATABASE_PORT}",
-  "POSTGRESQL_DATABASE=${DATABASE_NAME}",
-  'DATABASE_URL="${POSTGRESQL_USERNAME}:${POSTGRESQL_PASSWORD}@${DATABASE_HOST}:5432/${DATABASE_NAME}"'
+  "APP_SLUG=${APP_SLUG}",
+  "APP_NAME=${APP_NAME}",
+  "HOMEPAGE_GROUP=${HOMEPAGE_GROUP}",
+  "HOMEPAGE_ICON=${HOMEPAGE_ICON}",
+  "PORT=${PORT}",
+  "DATABASE_HOST=${DATABASE_HOST}",
+  "DATABASE_PORT=${DATABASE_PORT}",
+  "POSTGRESQL_DATABASE=${DATABASE_NAME}"
 ]
 
 pipeline {
@@ -71,6 +75,19 @@ pipeline {
             sh '''
               echo "Deploying..."
               docker compose --project-name ${APP_SLUG} --file deploy/lab/docker-compose.yml up --detach --remove-orphans
+            '''
+          }
+        }
+      }
+    }
+
+    stage("Cleanup") {
+      steps {
+        withVault([vaultSecrets: vaultSecrets]) {
+          withEnv(envs) {
+            sh '''
+              echo "Cleaning up..."
+              docker image prune --force
             '''
           }
         }

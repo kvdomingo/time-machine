@@ -3,9 +3,10 @@ services:
     build:
       context: ../..
       target: prod
-    image: gitea.local.kvdomingo.dev/kvdomingo/time-machine:latest
+      dockerfile: Dockerfile.prod
+    image: kvdomingo/time-machine:latest
     environment:
-      DJANGO_SETTINGS_MODULE: time_machine.settings
+      DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
@@ -13,21 +14,14 @@ services:
       POSTGRESQL_USERNAME: ${POSTGRESQL_USERNAME}
       POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD}
       POSTGRESQL_DATABASE: ${POSTGRESQL_DATABASE}
-      POSTGRESQL_HOST: db
-      POSTGRESQL_PORT: 5432
+      POSTGRESQL_HOST: ${DATABASE_HOST}
+      POSTGRESQL_PORT: ${DATABASE_PORT}
       DATABASE_URL: ${POSTGRESQL_USERNAME}:${POSTGRESQL_PASSWORD}@db:5432/${POSTGRESQL_DATABASE}
     restart: unless-stopped
+    volumes:
+      - ./tmp:/var/run
     depends_on:
       - db
-    healthcheck:
-      test:
-        - CMD
-        - curl
-        - "-f"
-        - "http://web:5000/health"
-      interval: 15s
-      timeout: 10s
-      retries: 3
 
   db:
     image: bitnami/postgresql:13
@@ -42,9 +36,14 @@ services:
   proxy:
     image: bitnami/nginx:latest
     environment:
-      - NGINX_HTTP_PORT_NUMBER=${PORT}
+      NGINX_HTTP_PORT_NUMBER: ${PORT}
+      APP_SLUG: ${APP_SLUG}
+      APP_NAME: ${APP_NAME}
+      HOMEPAGE_GROUP: ${HOMEPAGE_GROUP}
+      HOMEPAGE_ICON: ${HOMEPAGE_ICON}
     volumes:
       - ./proxy:/opt/bitnami/nginx/conf/server_blocks:ro
+      - ./tmp:/var/run:ro
     restart: on-failure
     networks:
       - default
