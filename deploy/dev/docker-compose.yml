@@ -18,7 +18,7 @@ services:
       - postgres
 
   frontend:
-    image: node:16-alpine
+    image: node:18-alpine
     environment:
       - HOST=0.0.0.0
       - PORT=3000
@@ -28,11 +28,11 @@ services:
       - WDS_SOCKET_PORT=0
     working_dir: /web
     volumes:
-      - ../../web/app:/web
+      - ../../ui:/web
     entrypoint:
       - /bin/sh
       - "-c"
-      - "yarn install && exec yarn start"
+      - "yarn install && exec yarn dev --host 0.0.0.0 --port 3000"
 
   proxy:
     image: bitnami/nginx:latest
@@ -44,6 +44,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.time_machine-dev.rule=Host(`dev.time-machine.localhost`)"
       - "traefik.http.routers.time_machine-dev.entrypoints=http"
+      - "traefik.http.routers.time_machine-dev.middlewares=secured@file"
       - "traefik.docker.network=gateway"
       - "traefik.http.services.time_machine-dev.loadbalancer.server.port=8000"
     restart: on-failure

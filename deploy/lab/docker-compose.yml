@@ -52,14 +52,10 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.${APP_SLUG}.entrypoints=http"
-      - "traefik.http.routers.${APP_SLUG}.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`)"
-      - "traefik.http.middlewares.${APP_SLUG}-https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.${APP_SLUG}.middlewares=${APP_SLUG}-https-redirect"
-      - "traefik.http.routers.${APP_SLUG}-secure.entrypoints=https"
-      - "traefik.http.routers.${APP_SLUG}-secure.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`) || Host(`${APP_SLUG}.kvdomingo.dev`)"
-      - "traefik.http.routers.${APP_SLUG}-secure.tls=true"
-      - "traefik.http.routers.${APP_SLUG}-secure.service=${APP_SLUG}"
+      - "traefik.http.routers.${APP_SLUG}.entrypoints=https"
+      - "traefik.http.routers.${APP_SLUG}.rule=Host(`${APP_SLUG}.local.kvdomingo.dev`) || Host(`${APP_SLUG}.kvdomingo.dev`)"
+      - "traefik.http.routers.${APP_SLUG}.tls=true"
+      - "traefik.http.routers.${APP_SLUG}.service=${APP_SLUG}"
       - "traefik.http.services.${APP_SLUG}.loadbalancer.server.port=${PORT}"
       - "traefik.docker.network=proxy"
       - "homepage.group=${HOMEPAGE_GROUP}"

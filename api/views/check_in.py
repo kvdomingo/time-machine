@@ -1,3 +1,4 @@
+from ast import literal_eval
 from datetime import datetime, timedelta
 
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -7,9 +8,11 @@ from django_filters import rest_framework as filters
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from ..models import CheckIn
-from ..serializers import CheckInSerializer
-from ..types import RESTRequest
+from api.models import CheckIn
+from api.serializers import CheckInSerializer
+from api.types import RESTRequest
+
+DEFAULT_DATE_FORMAT = "%Y-%m-%d"
 
 
 class CheckInFilter(filters.FilterSet):
@@ -18,7 +21,7 @@ class CheckInFilter(filters.FilterSet):
 
     class Meta:
         model = CheckIn
-        fields = ["record_date"]
+        fields = ["record_date", "tag"]
 
 
 class CheckInViewSet(ModelViewSet):
@@ -46,25 +49,47 @@ class TextLogViewSet(GenericViewSet):
     def list(self, request: RESTRequest):
         start_date = request.GET.get("start_date")
         end_date = request.GET.get("end_date")
+        tag = request.GET.get("tag")
+        combine_tags = request.GET.get("combine_tags", "false") == "true"
+
         if not start_date:
             start_date = timezone.now()
         else:
-            start_date = timezone.make_aware(datetime.strptime(start_date, "%Y-%m-%d"))
+            start_date = timezone.make_aware(
+                datetime.strptime(start_date, DEFAULT_DATE_FORMAT)
+            )
         if not end_date:
             end_date = timezone.now()
         else:
-            end_date = timezone.make_aware(datetime.strptime(end_date, "%Y-%m-%d"))
+            end_date = timezone.make_aware(
+                datetime.strptime(end_date, DEFAULT_DATE_FORMAT)
+            )
+
         queryset: QuerySet[CheckIn] = self.get_queryset().filter(
             record_date__gte=start_date,
             record_date__lte=end_date,
         )
+
+        if tag:
+            queryset = queryset.filter(tag__iexact=tag)
+
         number_of_days = (end_date - start_date).days + 1
         response = {}
         for n in range(number_of_days):
             record_date = start_date + timedelta(days=n)
             qs = queryset.all().filter(record_date=record_date)
-            queryset_unique_tags = qs.values("tag").annotate(
-                duration=Sum("duration"), activities=ArrayAgg("activities", distinct=True)
-            )
-            response[record_date.strftime("%Y-%m-%d")] = queryset_unique_tags
+
+            if combine_tags:
+                result = qs.values("tag").annotate(
+                    duration=Sum("duration"),
+                    activities=ArrayAgg("activities", distinct=True),
+                )
+            else:
+                result = (
+                    qs.values("tag", "duration")
+                    .annotate(activities=ArrayAgg("activities"))
+                    .order_by("start_time")
+                )
+
+            response[record_date.strftime(DEFAULT_DATE_FORMAT)] = result
         return Response(response)

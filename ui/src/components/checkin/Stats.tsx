@@ -1,0 +1,118 @@
+import { useEffect, useState } from "react";
+import Plot from "react-plotly.js";
+
+import { Grid, Paper, Tab, Tabs } from "@mui/material";
+
+import { CheckInResponse } from "@/api/types/checkIn";
+import { useSelector } from "@/store/hooks.ts";
+import { selectSelectedTag } from "@/store/timeSlice.ts";
+
+interface StatsProps {
+  checkIns: CheckInResponse[];
+}
+
+interface Data {
+  tag: string;
+  value: number;
+}
+
+enum ChartType {
+  Pie,
+  Bar,
+}
+
+function Stats({ checkIns }: StatsProps) {
+  const byTag = !!useSelector(selectSelectedTag);
+
+  const [chartSelector, setChartSelector] = useState<ChartType>(ChartType.Pie);
+  const [data, setData] = useState<any>({});
+  const uniqueTags = byTag
+    ? [...new Set(checkIns.map(c => c.activities))]
+    : [...new Set(checkIns.map(c => c.tag))];
+
+  useEffect(() => {
+    let stats: Data[] = uniqueTags.map(tag => ({ tag, value: 0 }));
+    checkIns.forEach(c => {
+      let indexOfTag = stats.findIndex(
+        s => s.tag === (byTag ? c.activities : c.tag),
+      );
+      stats[indexOfTag].value += c.duration;
+    });
+    stats.sort((a, b) => a.value - b.value);
+
+    switch (chartSelector) {
+      case ChartType.Pie: {
+        setData({
+          labels: stats.map(s => s.tag),
+          values: stats.map(s => s.value),
+          type: "pie",
+          textinfo: "value+percent",
+        });
+        break;
+      }
+      case ChartType.Bar: {
+        setData({
+          x: stats.map(s => s.value),
+          y: stats.map(s => s.tag),
+          type: "bar",
+          orientation: "h",
+          text: stats.map(
+            s => `${s.tag} ${s.value} ${s.value === 1 ? "hr" : "hrs"}`,
+          ),
+        });
+        break;
+      }
+      default: {
+        setData({});
+      }
+    }
+  }, [checkIns, chartSelector]);
+
+  return (
+    <Paper elevation={2} sx={{ p: 2, backgroundColor: "black", mt: 4 }}>
+      <Grid container justifyContent="center">
+        <Tabs
+          value={chartSelector}
+          onChange={(_, newValue) => setChartSelector(newValue)}
+        >
+          <Tab label="pie" />
+          <Tab label="bar" />
+        </Tabs>
+      </Grid>
+      <Grid
+        container
+        mt={2}
+        justifyContent="center"
+        sx={{ overflow: "scroll" }}
+      >
+        {checkIns.length === 0 ? (
+          "No check ins within the selected period"
+        ) : (
+          <Plot
+            data={[data]}
+            layout={{
+              width: 400,
+              height: 500,
+              margin: { t: 0, b: 0, l: 0, r: 0, pad: 0 },
+              legend: {
+                orientation: "h",
+              },
+              font: {
+                family: "Nunito",
+                color: "white",
+              },
+              paper_bgcolor: "transparent",
+              plot_bgcolor: "transparent",
+            }}
+            config={{
+              responsive: true,
+              displayModeBar: false,
+            }}
+          />
+        )}
+      </Grid>
+    </Paper>
+  );
+}
+
+export default Stats;
