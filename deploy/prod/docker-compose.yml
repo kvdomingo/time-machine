@@ -15,15 +15,16 @@ services:
   proxy:
     image: bitnami/nginx:latest
     environment:
-      - NGINX_HTTP_PORT_NUMBER=8001
+      - NGINX_HTTP_PORT_NUMBER=8000
     volumes:
       - ./proxy:/opt/bitnami/nginx/conf/server_blocks:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.time_machine.rule=Host(`time-machine.localhost`)"
       - "traefik.http.routers.time_machine.entrypoints=http"
+      - "traefik.http.routers.time_machine.middlewares=secured@file"
       - "traefik.docker.network=gateway"
-      - "traefik.http.services.time_machine.loadbalancer.server.port=8001"
+      - "traefik.http.services.time_machine.loadbalancer.server.port=8000"
     restart: unless-stopped
     networks:
       - default

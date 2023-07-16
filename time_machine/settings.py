@@ -172,11 +172,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "/static/"
+STATIC_URL = "/assets/"
 
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = BASE_DIR / "web"
 
-STATICFILES_DIRS = [BASE_DIR / "web" / "app" / "static"]
+STATICFILES_DIRS = [
+    BASE_DIR / "web" / "static",
+    BASE_DIR / "web" / "assets",
+]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
