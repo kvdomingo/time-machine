@@ -22,7 +22,6 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.time_machine.rule=Host(`time-machine.localhost`)"
       - "traefik.http.routers.time_machine.entrypoints=http"
-      - "traefik.http.routers.time_machine.middlewares=secured@file"
       - "traefik.docker.network=gateway"
       - "traefik.http.services.time_machine.loadbalancer.server.port=8000"
     restart: unless-stopped
