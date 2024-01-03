@@ -4,6 +4,13 @@ env:
   ENV: dev
   NAME: time-machine-{{.ENV}}
 
+vars:
+  SHORT_SHA:
+    sh: git rev-parse --short HEAD
+  IMAGE_REGISTRY: git.lab.kvd.studio
+  IMAGE_REPOSITORY: r/time-machine
+  IMAGE_TAG: "{{.IMAGE_REGISTRY}}/{{.IMAGE_REPOSITORY}}:{{.SHORT_SHA}}"
+
 dotenv:
   - deploy/dev/.env
 
@@ -55,3 +62,24 @@ tasks:
     desc: Stop and remove all containers
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml down -v --remove-orphans
+
+  build-and-push:
+    desc: Build & push prod Docker image
+    cmds:
+      - docker build --tag {{.IMAGE_TAG}} --file Dockerfile.prod .
+      - docker push {{.IMAGE_TAG}}
+
+  deploy:
+    desc: Deploy to prod K8s cluster
+    dir: infra/helm
+    cmds:
+      - >
+        helm upgrade --install postgres bitnami/postgresql
+        --namespace time-machine
+        --create-namespace
+        --values pg-values.yaml
+      - >
+        helm upgrade --install time-machine ./time-machine
+        --set-string image.tag={{.SHORT_SHA}}
+        --namespace time-machine
+        --create-namespace

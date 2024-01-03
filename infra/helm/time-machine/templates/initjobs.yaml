@@ -1,0 +1,80 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-wait-db
+  labels:
+    {{- include "time-machine.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-4"
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: init-wait-db
+          image: bitnami/postgresql:13.13.0-debian-11-r20
+          envFrom:
+            - configMapRef:
+                name: time-machine-configmap
+            - secretRef:
+                name: time-machine-secrets
+          command:
+            - /bin/sh
+            - -c
+            - >
+              until pg_isready -h $POSTGRESQL_HOST -U $POSTGRESQL_USERNAME -d $POSTGRESQL_DATABASE; do
+              sleep 2;
+              done;
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-migrate-db
+  labels:
+    {{- include "time-machine.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-3"
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: init-migrate-db
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          envFrom:
+            - configMapRef:
+                name: time-machine-configmap
+            - secretRef:
+                name: time-machine-secrets
+          command:
+            - /bin/sh
+            - -c
+            - python manage.py migrate
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-create-superuser
+  labels:
+    {{- include "time-machine.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-2"
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: init-create-superuser
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          envFrom:
+            - configMapRef:
+                name: time-machine-configmap
+            - secretRef:
+                name: time-machine-secrets
+          command:
+            - /bin/sh
+            - -c
+            - python manage.py createsuperuser --noinput || true

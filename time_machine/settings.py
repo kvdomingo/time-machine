@@ -11,15 +11,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
-import urllib
-from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
 from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
-
-from .utils import get_jwks, load_env
 
 load_dotenv()
 
@@ -113,7 +109,9 @@ def get_database_connection():
     user = os.environ.get("POSTGRESQL_USERNAME")
     password = os.environ.get("POSTGRESQL_PASSWORD")
     db = os.environ.get("POSTGRESQL_DATABASE")
-    return f"postgres://{user}:{password}@postgres:5432/{db}"
+    host = os.environ.get("POSTGRESQL_HOST")
+    port = os.environ.get("POSTGRESQL_PORT", "5432")
+    return f"postgres://{user}:{password}@{host}:{port}/{db}"
 
 
 DATABASES = {"default": dj_database_url.parse(get_database_connection())}

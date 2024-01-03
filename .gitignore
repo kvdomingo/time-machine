@@ -143,3 +143,4 @@ cython_debug/
 *.iml
 
 /static/
+secrets.yaml
