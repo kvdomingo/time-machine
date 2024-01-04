@@ -71,15 +71,6 @@ tasks:
 
   deploy:
     desc: Deploy to prod K8s cluster
-    dir: infra/helm
+    dir: infra/argocd
     cmds:
-      - >
-        helm upgrade --install postgres bitnami/postgresql
-        --namespace time-machine
-        --create-namespace
-        --values pg-values.yaml
-      - >
-        helm upgrade --install time-machine ./time-machine
-        --set-string image.tag={{.SHORT_SHA}}
-        --namespace time-machine
-        --create-namespace
+      - kubectl apply -f application.yaml
