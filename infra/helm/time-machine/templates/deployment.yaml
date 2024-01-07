@@ -7,6 +7,10 @@ metadata:
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
   {{- end }}
   selector:
     matchLabels:
@@ -59,6 +63,43 @@ spec:
                 name: time-machine-configmap
             - secretRef:
                 name: time-machine-secrets
+      initContainers:
+        - name: init-wait-db
+          image: bitnami/postgresql:13.13.0-debian-11-r20
+          envFrom:
+            - configMapRef:
+                name: time-machine-configmap
+            - secretRef:
+                name: time-machine-secrets
+          command:
+            - /bin/sh
+            - -c
+            - >
+              until pg_isready -h $POSTGRESQL_HOST -U $POSTGRESQL_USERNAME -d $POSTGRESQL_DATABASE; do
+              sleep 2;
+              done;
+        - name: init-migrate-db
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          envFrom:
+            - configMapRef:
+                name: time-machine-configmap
+            - secretRef:
+                name: time-machine-secrets
+          command:
+            - /bin/sh
+            - -c
+            - python manage.py migrate
+        - name: init-create-superuser
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          envFrom:
+            - configMapRef:
+                name: time-machine-configmap
+            - secretRef:
+                name: time-machine-secrets
+          command:
+            - /bin/sh
+            - -c
+            - python manage.py createsuperuser --noinput || true
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}

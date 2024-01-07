@@ -74,3 +74,10 @@ tasks:
     dir: infra/argocd
     cmds:
       - kubectl apply -f application.yaml
+
+  destroy:
+    desc: Destroy prod K8s resources
+    dir: infra/argocd
+    cmds:
+      - kubectl delete -f application.yaml
+      - kubectl delete all --all

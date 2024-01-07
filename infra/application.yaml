@@ -8,14 +8,9 @@ spec:
   sources:
     - repoURL: https://git.lab.kvd.studio/r/time-machine.git
       targetRevision: main
-      ref: values
-    - repoURL: https://charts.bitnami.com/bitnami
-      chart: postgresql
-      targetRevision: "13.2.27"
-      helm:
-        releaseName: postgres
-        valueFiles:
-          - $values/infra/helm/pg-values.yaml
+      path: infra/helm/time-machine
+      plugin:
+        name: argocd-vault-plugin-helm
   destination:
     server: https://kubernetes.default.svc
     namespace: time-machine
