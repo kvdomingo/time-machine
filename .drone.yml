@@ -47,26 +47,14 @@ steps:
         - "${DRONE_COMMIT_SHA}"
 
   - name: Update manifest repo
-    image: alpine/git
-    commands:
-      - >
-        wget https://github.com/mikefarah/yq/releases/download/$${YQ_VERSION}/$${YQ_BINARY}.tar.gz -O - | 
-        tar xz && 
-        mv $${YQ_BINARY} /usr/bin/yq
-      - mkdir -p ~/.ssh
-      - echo -e "$${SSH_KEY}" > ~/.ssh/gtkey && chmod 400 ~/.ssh/gtkey
-      - echo -e 'Host git.lab.kvd.studio\n  Port 3322\n  IdentityFile ~/.ssh/gtkey\n' > ~/.ssh/config
-      - echo -e "$${KNOWN_HOSTS}" > ~/.ssh/known_hosts
-      - git clone git@git.lab.kvd.studio:r/homelab.git
-      - cd homelab/time-machine/time-machine
-      - yq eval '.image.tag = "${DRONE_COMMIT_SHA}"' --inplace values.yaml
-      - git add values.yaml
-      - git commit -m "Update time-machine release tag to ${DRONE_COMMIT_SHA}"
-      - git push
-    environment:
-      YQ_VERSION: v4.2.0
-      YQ_BINARY: yq_linux_amd64
-      SSH_KEY:
+    image: git.lab.kvd.studio/r/update-manifest-image-tag:v0.2
+    settings:
+      ssh_key:
         from_secret: GITEA_SSH_KEY
-      KNOWN_HOSTS:
+      known_hosts:
         from_secret: GITEA_KNOWN_HOSTS
+      manifest_repo_name: homelab
+      helm_values_path: time-machine/time-machine/values.yaml
+      yaml_image_tag_path: ".image.tag"
+      image_tag: ${DRONE_COMMIT_SHA}
+      app_name: ${DRONE_REPO_NAME}
