@@ -4,13 +4,6 @@ env:
   ENV: dev
   NAME: time-machine-{{.ENV}}
 
-vars:
-  SHORT_SHA:
-    sh: git rev-parse --short HEAD
-  IMAGE_REGISTRY: git.lab.kvd.studio
-  IMAGE_REPOSITORY: r/time-machine
-  IMAGE_TAG: "{{.IMAGE_REGISTRY}}/{{.IMAGE_REPOSITORY}}:{{.SHORT_SHA}}"
-
 dotenv:
   - deploy/dev/.env
 
@@ -63,21 +56,14 @@ tasks:
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml down -v --remove-orphans
 
-  build-and-push:
-    desc: Build & push prod Docker image
-    cmds:
-      - docker build --tag {{.IMAGE_TAG}} --file Dockerfile.prod .
-      - docker push {{.IMAGE_TAG}}
-
-  deploy:
-    desc: Deploy to prod K8s cluster
-    dir: infra/argocd
+  register:
+    desc: Register to prod K8s cluster
+    dir: infra
     cmds:
       - kubectl apply -f application.yaml
 
-  destroy:
-    desc: Destroy prod K8s resources
-    dir: infra/argocd
+  deregister:
+    desc: Deregister from prod K8s cluster
+    dir: infra
     cmds:
       - kubectl delete -f application.yaml
-      - kubectl delete all --all
