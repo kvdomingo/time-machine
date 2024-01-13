@@ -45,6 +45,21 @@ trigger:
     - push
 
 steps:
+  - name: Notify build started
+    image: appleboy/drone-discord
+    settings:
+      webhook_id:
+        from_secret: DISCORD_WEBHOOK_ID
+      webhook_token:
+        from_secret: DISCORD_WEBHOOK_TOKEN
+      message: >-
+        # Build [#${DRONE_BUILD_NUMBER}](${DRONE_BUILD_LINK})
+
+        Started for [${DRONE_REPO}](${DRONE_REPO_LINK})
+        by [${DRONE_COMMIT_AUTHOR}](https://git.lab.kvd.studio/${DRONE_COMMIT_AUTHOR}).
+        
+        `${DRONE_COMMIT_SHA}`: ${DRONE_COMMIT_MESSAGE}
+
   - name: Build and push
     image: plugins/docker
     settings:
@@ -71,10 +86,28 @@ steps:
       image_tag: ${DRONE_COMMIT_SHA}
       app_name: ${DRONE_REPO_NAME}
 
-  - name: Notify build status
+  - name: Notify build success
     image: appleboy/drone-discord
+    when:
+      status: [ success ]
     settings:
       webhook_id:
         from_secret: DISCORD_WEBHOOK_ID
       webhook_token:
         from_secret: DISCORD_WEBHOOK_TOKEN
+      message: >-
+        Build [#${DRONE_BUILD_NUMBER}](${DRONE_BUILD_LINK}) for
+        [${DRONE_REPO}](${DRONE_REPO_LINK}) **succeeded**.
+
+  - name: Notify build failure
+    image: appleboy/drone-discord
+    when:
+      status: [ failure ]
+    settings:
+      webhook_id:
+        from_secret: DISCORD_WEBHOOK_ID
+      webhook_token:
+        from_secret: DISCORD_WEBHOOK_TOKEN
+      message: >-
+        Build [#${DRONE_BUILD_NUMBER}](${DRONE_BUILD_LINK}) for
+        [${DRONE_REPO}](${DRONE_REPO_LINK}) **failed**.
