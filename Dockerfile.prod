@@ -6,7 +6,7 @@ COPY ./ui/ ./
 
 RUN bun install && bun run build
 
-FROM python:3.10-bullseye AS prod
+FROM python:3.11-alpine3.19 AS base
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -16,15 +16,31 @@ ENV PIP_NO_CACHE_DIR off
 ENV PIP_DISABLE_PIP_VERSION_CHECK on
 ENV PIP_DEFAULT_TIMEOUT 100
 
-ARG POETRY_VERSION=1.7.0
+FROM base AS deps
 
-RUN pip install "poetry==$POETRY_VERSION" && poetry config virtualenvs.create false
+ENV POETRY_HOME /etc/poetry
+ENV PATH "$PATH:$POETRY_HOME/bin"
+
+ARG POETRY_VERSION=1.7.1
 
 WORKDIR /tmp
 
+RUN apk add curl && \
+    apk cache clean && \
+    curl -sSL https://install.python-poetry.org | python - --version "$POETRY_VERSION" && \
+    poetry config virtualenvs.create false
+
 COPY poetry.lock pyproject.toml ./
 
-RUN poetry export --without-hashes -f requirements.txt | pip install -r /dev/stdin
+RUN poetry export --without-hashes -f requirements.txt > requirements.txt
+
+FROM base AS prod
+
+WORKDIR /tmp
+
+COPY --from=deps /tmp/requirements.txt ./
+
+RUN pip install --no-cache-dir -r requirements.txt
 
 WORKDIR /backend
 

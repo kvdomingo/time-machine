@@ -46,7 +46,7 @@ tasks:
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml logs --follow {{.CLI_ARGS}}
 
-  shutdown:
+  stop:
     desc: Stop all containers
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml stop {{.CLI_ARGS}}

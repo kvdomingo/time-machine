@@ -1,4 +1,4 @@
-FROM python:3.10-bullseye AS base
+FROM python:3.11-alpine3.19 AS base
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -7,17 +7,20 @@ ENV PYTHONHASHSEED random
 ENV PIP_NO_CACHE_DIR off
 ENV PIP_DISABLE_PIP_VERSION_CHECK on
 ENV PIP_DEFAULT_TIMEOUT 100
-ENV POETRY_VERSION 1.5.0
+ENV POETRY_HOME /etc/poetry
+ENV PATH "$PATH:$POETRY_HOME/bin"
+
+ARG POETRY_VERSION=1.7.1
+
+RUN apk add curl && apk cache clean
 
 FROM base AS dev
 
-RUN pip install "poetry==$POETRY_VERSION"
+RUN curl -sSL https://install.python-poetry.org | python - --version "$POETRY_VERSION"
+
+RUN poetry config virtualenvs.create true && \
+    poetry config virtualenvs.in-project true
 
 WORKDIR /backend
 
-COPY poetry.lock pyproject.toml ./
-
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-interaction --no-ansi
-
-ENTRYPOINT [ "./docker-entrypoint.sh" ]
+ENTRYPOINT [ "./docker-entrypoint.dev.sh" ]

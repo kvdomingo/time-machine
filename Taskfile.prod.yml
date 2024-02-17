@@ -51,7 +51,7 @@ tasks:
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml logs --follow {{.CLI_ARGS}}
 
-  shutdown:
+  stop:
     desc: Stop all containers
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml stop {{.CLI_ARGS}}
@@ -60,7 +60,7 @@ tasks:
     desc: Stop and remove all containers
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml down --remove-orphans
-        
+
   clean:
     desc: Stop and remove all containers, volumes and networks
     cmds:
