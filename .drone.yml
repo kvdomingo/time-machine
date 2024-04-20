@@ -47,6 +47,7 @@ trigger:
 steps:
   - name: Notify build started
     image: appleboy/drone-discord
+    failure: ignore
     settings:
       webhook_id:
         from_secret: DISCORD_WEBHOOK_ID
@@ -101,6 +102,7 @@ steps:
 
   - name: Notify build success
     image: appleboy/drone-discord
+    failure: ignore
     when:
       status: [ success ]
     settings:
@@ -114,6 +116,7 @@ steps:
 
   - name: Notify build failure
     image: appleboy/drone-discord
+    failure: ignore
     when:
       status: [ failure ]
     settings:
