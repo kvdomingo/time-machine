@@ -74,6 +74,19 @@ steps:
       tags:
         - "${DRONE_COMMIT_SHA}"
 
+  - name: Build and push migrate utility
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: GCR_USERNAME
+      password:
+        from_secret: GCR_PASSWORD
+      repo: "git.lab.kvd.studio/${DRONE_REPO}-migrate"
+      dockerfile: migrate.Dockerfile
+      registry: git.lab.kvd.studio
+      tags:
+        - "${DRONE_COMMIT_SHA}"
+
   - name: Build and push Time Machine
     image: plugins/docker
     settings:
@@ -110,6 +123,19 @@ steps:
       manifest_repo_name: homelab
       helm_values_path: time-machine/values.yaml
       yaml_image_tag_path: ".postgresql.image.tag"
+      image_tag: ${DRONE_COMMIT_SHA}
+      app_name: ${DRONE_REPO_NAME}
+
+  - name: Update migrate manifest repo
+    image: git.lab.kvd.studio/r/update-manifest-image-tag:v0.2.1
+    settings:
+      ssh_key:
+        from_secret: GITEA_SSH_KEY
+      known_hosts:
+        from_secret: GITEA_KNOWN_HOSTS
+      manifest_repo_name: homelab
+      helm_values_path: time-machine/values.yaml
+      yaml_image_tag_path: ".migrate.image.tag"
       image_tag: ${DRONE_COMMIT_SHA}
       app_name: ${DRONE_REPO_NAME}
 
