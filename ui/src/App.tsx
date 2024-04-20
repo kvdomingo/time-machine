@@ -1,29 +1,21 @@
-import { Suspense } from "react";
-import { Helmet } from "react-helmet";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
 
-import LoggedInView from "./components/LoggedInView";
-import CheckInView from "./components/checkin";
-import FullPageLoading from "./components/shared/FullPageLoading";
-import GlobalNotification from "./components/shared/GlobalNotification";
+import { queryClient } from "./api";
+import { routeTree } from "./routeTree.gen";
+
+const router = createRouter({
+  routeTree,
+  context: { queryClient },
+});
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
 
 function App() {
-  return (
-    <Router>
-      <Helmet>
-        <link rel="icon" href="/logo192.png" />
-        <link rel="apple-touch-icon" href="/logo192.png" />
-      </Helmet>
-      <Suspense fallback={<FullPageLoading />}>
-        <Routes>
-          <Route path="/" element={<LoggedInView />}>
-            <Route path="/" element={<CheckInView />} />
-          </Route>
-        </Routes>
-      </Suspense>
-      <GlobalNotification />
-    </Router>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

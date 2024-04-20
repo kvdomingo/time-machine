@@ -12,19 +12,6 @@ tasks:
     desc: Build and start containers
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml up -d --build --remove-orphans {{.CLI_ARGS}}
-      - task -t Taskfile.prod.yml logs
-
-  frontend-start:
-    desc: Start frontend
-    dir: web/app
-    cmds:
-      - yarn install
-      - yarn start
-
-  backend-start:
-    desc: Start backend
-    cmds:
-      - poetry run python manage.py runserver 127.0.0.1:5000
 
   reload-proxy:
     desc: Reload proxy config
@@ -65,3 +52,9 @@ tasks:
     desc: Stop and remove all containers, volumes and networks
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml down --remove-orphans --volumes
+
+  migrate:
+    desc: Apply database migrations
+    dir: api
+    cmds:
+      - migrate -source file://migrations -database pgx5://{{.POSTGRESQL_USERNAME}}:{{.POSTGRESQL_PASSWORD}}@localhost:5432/{{.POSTGRESQL_DATABASE}}?sslmode=disable up

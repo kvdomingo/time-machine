@@ -1,19 +1,16 @@
-import { ReactElement, useEffect } from "react";
+import { type ReactElement, useEffect } from "react";
 
 import axios, {
-  AxiosError,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
+  type AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
 } from "axios";
 import moment from "moment";
 
-import { useDispatch } from "../store/hooks";
-import {
-  updateApiRequestLoading,
-  updateGlobalNotification,
-} from "../store/timeSlice";
+import { useStore } from "@/store.ts";
+import { QueryClient } from "@tanstack/react-query";
 import { DEFAULT_DATE_FORMAT } from "../utils/constants";
-import {
+import type {
   CheckInForm,
   CheckInResponse,
   PaginatedResponse,
@@ -31,7 +28,7 @@ const axi = axios.create({
 const api = {
   checkin: {
     list(
-      page: number = 1,
+      page = 1,
       startDate: string = moment().format(DEFAULT_DATE_FORMAT),
       endDate?: string,
       tag?: string,
@@ -40,7 +37,7 @@ const api = {
         page,
         start_date: startDate,
         end_date: endDate ?? undefined,
-        tag: tag ? tag : undefined,
+        tag: tag ?? undefined,
       };
       return axi.get("/checkin", { params });
     },
@@ -51,23 +48,18 @@ const api = {
       startDate: string = moment().format(DEFAULT_DATE_FORMAT),
       endDate?: string,
       tag?: string,
-      combineTags?: boolean,
     ): Promise<AxiosResponse<TextLogResponse>> {
       const params = {
         start_date: startDate,
         end_date: endDate ?? undefined,
-        tag: tag ? tag : undefined,
-        combine_tags: combineTags ? "true" : "false",
+        tag: tag ?? undefined,
       };
       return axi.get("/textLog", { params });
     },
     create(body: CheckInForm): Promise<AxiosResponse<CheckInResponse>> {
       return axi.post("/checkin", body);
     },
-    update(
-      id: string,
-      body: CheckInForm,
-    ): Promise<AxiosResponse<CheckInResponse>> {
+    update(id: string, body: CheckInForm): Promise<AxiosResponse<CheckInResponse>> {
       return axi.put(`/checkin/${id}`, body);
     },
     delete(id: string): Promise<AxiosResponse> {
@@ -84,11 +76,10 @@ const api = {
 export default api;
 
 export function AxiosInterceptorProvider(props: { children: ReactElement }) {
-  const dispatch = useDispatch();
+  const { updateGlobalNotification } = useStore();
 
   useEffect(() => {
     function requestFulfilledInterceptor(config: InternalAxiosRequestConfig) {
-      dispatch(updateApiRequestLoading(true));
       return config;
     }
 
@@ -97,24 +88,24 @@ export function AxiosInterceptorProvider(props: { children: ReactElement }) {
     }
 
     function responseFulfilledInterceptor(response: AxiosResponse) {
-      dispatch(updateApiRequestLoading(false));
       return response;
     }
 
     async function responseRejectedInterceptor(error: AxiosError) {
-      dispatch(updateApiRequestLoading(false));
-      const { status } = error.response!;
+      const { status } = error.response ?? { status: 0 };
+
       if (axios.isCancel(error)) {
         return Promise.reject(error);
-      } else if (status > 400) {
-        dispatch(
-          updateGlobalNotification({
-            type: "error",
-            message: "An error occurred. Please try again later.",
-            visible: true,
-          }),
-        );
       }
+
+      if (status > 400) {
+        updateGlobalNotification({
+          type: "error",
+          message: "An error occurred. Please try again later.",
+          visible: true,
+        });
+      }
+
       console.error(error);
       return Promise.reject(error);
     }
@@ -132,7 +123,17 @@ export function AxiosInterceptorProvider(props: { children: ReactElement }) {
       axi.interceptors.request.eject(reqInterceptId);
       axi.interceptors.response.eject(resInterceptId);
     };
-  }, [dispatch]);
+  }, [updateGlobalNotification]);
 
   return props.children;
 }
+
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+    },
+  },
+});

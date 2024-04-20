@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Delete, Edit } from "@mui/icons-material";
 import { Grid, IconButton, ListItem, Typography } from "@mui/material";
@@ -6,37 +6,40 @@ import moment from "moment/moment";
 import pluralize from "pluralize";
 
 import api from "@/api";
-import { CheckInResponse } from "@/api/types/checkIn.ts";
-import useFetchCheckIns from "@/hooks/useFetchCheckIns";
-import { useDispatch, useSelector } from "@/store/hooks.ts";
-import { selectSelectedTag, updateSelectedTag } from "@/store/timeSlice.ts";
+
 import { DEFAULT_TIME_FORMAT } from "@/utils/constants.ts";
 
+import type { CheckInResponse } from "@/api/types/checkIn.ts";
+import { useMutation } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import CheckInAddEdit from "./CheckInAddEdit";
 
 interface CheckInItemProps {
   checkIn: CheckInResponse;
 }
 
+const Route = getRouteApi("/");
+
 function CheckInItem({ checkIn }: CheckInItemProps) {
-  const fetchCheckIns = useFetchCheckIns();
-  const dispatch = useDispatch();
-  const selectedTag = useSelector(selectSelectedTag);
+  const navigate = Route.useNavigate();
+  const search = Route.useSearch();
+
+  const deleteCheckIn = useMutation({
+    mutationFn: (id: string) => api.checkin.delete(id),
+    mutationKey: ["checkin", "delete"],
+  });
+
   const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(() => {
-    fetchCheckIns();
-  }, [selectedTag]);
-
-  function handleDeleteCheckIn(id: string) {
-    api.checkin
-      .delete(id)
-      .then(() => fetchCheckIns())
-      .catch(err => console.error(err.message));
+  async function handleDeleteCheckIn(id: string) {
+    await deleteCheckIn.mutateAsync(id);
   }
 
-  function handleSelectTag(tag: string) {
-    dispatch(updateSelectedTag(selectedTag === tag ? "" : tag));
+  async function handleSelectTag(tag: string) {
+    await navigate({
+      to: "./",
+      search: { ...search, tag: tag === search.tag ? undefined : tag },
+    });
   }
 
   return (
@@ -62,35 +65,21 @@ function CheckInItem({ checkIn }: CheckInItemProps) {
               variant="body1"
               color="primary"
               className="mx-2 cursor-pointer"
-              onClick={() => handleSelectTag(checkIn.tag)}
+              onClick={async () => await handleSelectTag(checkIn.tag)}
             >
               #{checkIn.tag}
             </Typography>
             <Typography variant="body1">{checkIn.activities}</Typography>
             <Typography variant="body1" ml={1}>
-              (
-              {moment(checkIn.start_time, "HH:mm:ss").format(
-                DEFAULT_TIME_FORMAT,
-              )}{" "}
-              -{" "}
+              ({moment(checkIn.start_time, "HH:mm:ss").format(DEFAULT_TIME_FORMAT)} -{" "}
               {moment(checkIn.start_time, "HH:mm:ss")
                 .add(checkIn.duration, "hours")
                 .format("HH:mm")}
               )
             </Typography>
           </Grid>
-          <Grid
-            item
-            xs={2}
-            md={2}
-            container
-            justifyContent={{ md: "flex-end" }}
-          >
-            <IconButton
-              color="info"
-              onClick={() => setIsEditing(true)}
-              size="small"
-            >
+          <Grid item xs={2} md={2} container justifyContent={{ md: "flex-end" }}>
+            <IconButton color="info" onClick={() => setIsEditing(true)} size="small">
               <Edit />
             </IconButton>
             <IconButton

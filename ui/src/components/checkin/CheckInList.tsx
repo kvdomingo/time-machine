@@ -1,27 +1,22 @@
-import { Dispatch, SetStateAction } from "react";
-
 import { Grid, List, ListItem, Pagination } from "@mui/material";
 
-import useFetchCheckIns from "@/hooks/useFetchCheckIns";
-import { useSelector } from "@/store/hooks.ts";
-import { selectCheckIns, selectCount } from "@/store/timeSlice.ts";
-
+import type { CheckInResponse, PaginatedResponse } from "@/api/types/checkIn.ts";
+import { getRouteApi } from "@tanstack/react-router";
 import CheckInAddEdit from "./CheckInAddEdit";
 import CheckInItem from "./CheckInItem";
 
 interface CheckInListProps {
-  page: number;
-  setPage: Dispatch<SetStateAction<number>>;
+  data: PaginatedResponse<CheckInResponse[]>;
 }
 
-function CheckInList({ page, setPage }: CheckInListProps) {
-  const checkIns = useSelector(selectCheckIns);
-  const fetchCheckIns = useFetchCheckIns();
-  const count = useSelector(selectCount);
+const Route = getRouteApi("/");
 
-  function handlePageChange(page: number) {
-    setPage(page);
-    fetchCheckIns(page);
+function CheckInList({ data }: CheckInListProps) {
+  const navigate = Route.useNavigate();
+  const search = Route.useSearch();
+
+  async function handlePageChange(page: number) {
+    await navigate({ to: "./", search: { ...search, page } });
   }
 
   return (
@@ -44,8 +39,8 @@ function CheckInList({ page, setPage }: CheckInListProps) {
         <ListItem>
           <CheckInAddEdit />
         </ListItem>
-        {checkIns.length > 0 ? (
-          checkIns.map(c => <CheckInItem checkIn={c} key={c.id} />)
+        {data.results.length > 0 ? (
+          data.results.map(c => <CheckInItem checkIn={c} key={c.id} />)
         ) : (
           <ListItem sx={{ color: "text.secondary" }}>
             No check ins within the selected time period
@@ -54,8 +49,8 @@ function CheckInList({ page, setPage }: CheckInListProps) {
       </List>
       <Grid container justifyContent="center">
         <Pagination
-          count={Math.ceil(count / 10)}
-          page={page}
+          count={Math.ceil(data.count / 10)}
+          page={search.page}
           onChange={(_, page) => handlePageChange(page)}
         />
       </Grid>

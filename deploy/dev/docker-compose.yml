@@ -1,18 +1,12 @@
-networks:
-  gateway:
-    external: true
-
 services:
   backend:
     build:
-      context: ../..
-      target: dev
-      dockerfile: Dockerfile.dev
-    image: kvdomingo/time-machine-api:latest
+      context: ../../api
+      dockerfile: dev.Dockerfile
+    image: kvdomingo/time-machine-go-api
     env_file: .env
     volumes:
-      - ../..:/backend
-      - ../../.venv-docker:/backend/.venv
+      - ../../api:/app
     depends_on:
       postgres:
         condition: service_healthy
@@ -26,7 +20,7 @@ services:
       - 8000:8000
 
   frontend:
-    image: oven/bun:1.0-alpine
+    image: oven/bun:1.1-alpine
     environment:
       NODE_ENV: development
     working_dir: /web
@@ -40,7 +34,10 @@ services:
       - 3000:3000
 
   postgres:
-    image: bitnami/postgresql:13.14.0-debian-11-r13
+    build:
+      context: ../..
+      dockerfile: pg.Dockerfile
+    image: kvdomingo/time-machine-postgresql
     env_file: .env
     volumes:
       - db-data:/bitnami/postgresql
@@ -49,7 +46,8 @@ services:
       interval: 20s
       timeout: 5s
       retries: 3
-      start_interval: 10s
+    ports:
+      - 5432:5432
 
 volumes:
   db-data:

@@ -1,30 +1,33 @@
 import { Box, Button } from "@mui/material";
 
-import { useSelector } from "@/store/hooks.ts";
-import { selectTextLog } from "@/store/timeSlice.ts";
+import type { TextLogResponse } from "@/api/types/checkIn.ts";
+import { useMemo } from "react";
 
-function TextLog() {
-  const data = useSelector(selectTextLog);
+interface TextLogProps {
+  log: TextLogResponse;
+}
 
-  function generateLog() {
+function TextLog({ log: data }: TextLogProps) {
+  const text = useMemo<string>(() => {
     let textLog = "";
-    Object.entries(data).forEach(([date, entry]) => {
-      if (entry.length === 0) return;
+
+    for (const [date, entry] of Object.entries(data)) {
+      if (entry.length === 0) continue;
+
       textLog = textLog.concat(`checkin ${date}`);
       textLog = textLog.concat(
         ...entry.map(
           dat =>
-            `\n- ${dat.duration.toFixed(2)} hr${
-              dat.duration === 1 ? "" : "s"
-            } #${dat.tag} ${dat.activities.join(", ")}`,
+            `\n  • ${dat.duration.toFixed(2)} hr${dat.duration === 1 ? "" : "s"} #${
+              dat.tag
+            } ${dat.activities}`,
         ),
       );
       textLog += "\n\n";
-    });
-    return textLog;
-  }
+    }
 
-  const text = generateLog();
+    return textLog;
+  }, [data]);
 
   return (
     <>

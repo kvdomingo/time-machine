@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
 
+import { useStore } from "@/store.ts";
 import { Alert, Snackbar } from "@mui/material";
 
-import { useDispatch, useSelector } from "@/store/hooks.ts";
-import {
-  selectGlobalNotification,
-  updateGlobalNotification,
-} from "@/store/timeSlice.ts";
-
 function GlobalNotification() {
-  const notificationState = useSelector(selectGlobalNotification);
-  const dispatch = useDispatch();
+  const { globalNotification: notificationState, updateGlobalNotification } =
+    useStore();
+
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -21,13 +17,11 @@ function GlobalNotification() {
     setOpen(false);
     setTimeout(
       () =>
-        dispatch(
-          updateGlobalNotification({
-            message: "",
-            type: "error",
-            visible: false,
-          }),
-        ),
+        updateGlobalNotification({
+          message: "",
+          type: "error",
+          visible: false,
+        }),
       300,
     );
   }

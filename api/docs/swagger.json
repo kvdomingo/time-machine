@@ -1,0 +1,11 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Time Machine",
+    "contact": {
+      "email": "hello@kvd.studio"
+    },
+    "version": "4.0.0-alpha.1"
+  },
+  "paths": {}
+}

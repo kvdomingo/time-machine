@@ -1,22 +1,16 @@
 import { useState } from "react";
 
 import { Add, Check, Close } from "@mui/icons-material";
-import {
-  Autocomplete,
-  Button,
-  Grid,
-  IconButton,
-  TextField,
-} from "@mui/material";
+import { Autocomplete, Button, Grid, IconButton, TextField } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import moment from "moment";
 
 import api from "@/api";
-import { CheckInForm, CheckInResponse } from "@/api/types/checkIn.ts";
-import useFetchCheckIns from "@/hooks/useFetchCheckIns";
-import { useSelector } from "@/store/hooks.ts";
-import { selectTagCache } from "@/store/timeSlice.ts";
+import { tagCacheQueryOptions } from "@/api/queryOptions.ts";
+import type { CheckInForm, CheckInResponse } from "@/api/types/checkIn.ts";
+
 import { DEFAULT_DATE_FORMAT, DEFAULT_TIME_FORMAT } from "@/utils/constants.ts";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
 enum CheckInStatus {
   OK = "",
@@ -24,27 +18,27 @@ enum CheckInStatus {
   NumberOnly = "This field should be a positive number",
 }
 
-interface CheckInAddEditProps {
-  isEditing?: boolean;
-  stopEditing?: () => void;
-  editingProps?: CheckInResponse;
-}
+type CheckInAddEditProps =
+  | {
+      isEditing: false;
+    }
+  | {
+      isEditing: true;
+      stopEditing: () => void;
+      editingProps: CheckInResponse;
+    };
 
-function CheckInAddEdit({
-  isEditing = false,
-  stopEditing = () => {},
-  editingProps,
-}: CheckInAddEditProps) {
+function CheckInAddEdit(props: CheckInAddEditProps) {
   const initialCheckIn: CheckInForm = {
-    duration: isEditing ? editingProps!.duration : 0,
-    start_time: isEditing
-      ? editingProps!.start_time
+    duration: props.isEditing ? props.editingProps.duration : 0,
+    start_time: props.isEditing
+      ? props.editingProps.start_time
       : moment().format(DEFAULT_TIME_FORMAT),
-    record_date: isEditing
-      ? editingProps!.record_date
+    record_date: props.isEditing
+      ? props.editingProps.record_date
       : moment().format(DEFAULT_DATE_FORMAT),
-    tag: isEditing ? editingProps!.tag : "",
-    activities: isEditing ? editingProps!.activities : "",
+    tag: props.isEditing ? props.editingProps.tag : "",
+    activities: props.isEditing ? props.editingProps.activities : "",
   };
 
   const initialErrors: Record<keyof CheckInForm, CheckInStatus> = {
@@ -55,12 +49,27 @@ function CheckInAddEdit({
     activities: CheckInStatus.OK,
   };
 
-  const tagCache = useSelector(selectTagCache);
-  const fetchCheckIns = useFetchCheckIns();
+  const queryClient = useQueryClient();
+
+  const {
+    data: { data: tagCache },
+  } = useSuspenseQuery(tagCacheQueryOptions);
+
+  const createCheckIn = useMutation({
+    mutationFn: (data: CheckInForm) => api.checkin.create(data),
+    mutationKey: ["checkin", "create"],
+  });
+
+  const updateCheckIn = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CheckInForm }) =>
+      api.checkin.update(id, data),
+    mutationKey: ["checkin", "update"],
+  });
+
   const [endTime, setEndTime] = useState(
-    isEditing
-      ? moment(editingProps!.start_time, DEFAULT_TIME_FORMAT)
-          .add(editingProps!.duration, "hours")
+    props.isEditing
+      ? moment(props.editingProps.start_time, DEFAULT_TIME_FORMAT)
+          .add(props.editingProps.duration, "hours")
           .format(DEFAULT_TIME_FORMAT)
       : moment().format(DEFAULT_TIME_FORMAT),
   );
@@ -76,8 +85,8 @@ function CheckInAddEdit({
   }
 
   function handleChange(e: any, _name?: string, _value?: string | null) {
-    let name = _name ?? e.target.name;
-    let value = _value ?? e.target.value;
+    const name = _name ?? e.target.name;
+    const value = _value ?? e.target.value;
     setNewCheckInData(form => ({
       ...form,
       [name]: value,
@@ -85,8 +94,8 @@ function CheckInAddEdit({
   }
 
   function handleConfirmChange(e: any, _name?: string, _value?: string | null) {
-    let name = _name ?? e.target.name;
-    let value = _value ?? e.target.value;
+    const name = _name ?? e.target.name;
+    const value = _value ?? e.target.value;
     setNewCheckInData(form => ({
       ...form,
       [name]: name === "tag" ? value.replace(/\s+/g, "-") : value,
@@ -95,14 +104,12 @@ function CheckInAddEdit({
 
   function handleChangeStartTime(value: string) {
     let _startTime = moment(value, DEFAULT_TIME_FORMAT);
-    let _endTime = moment(endTime, DEFAULT_TIME_FORMAT);
+    const _endTime = moment(endTime, DEFAULT_TIME_FORMAT);
     if (_startTime.isAfter(_endTime)) {
       _startTime = moment(_endTime);
     }
-    let diff = convertMillisecondsToHours(
-      _endTime.valueOf() - _startTime.valueOf(),
-    );
-    if (isNaN(diff)) diff = 0;
+    let diff = convertMillisecondsToHours(_endTime.valueOf() - _startTime.valueOf());
+    if (Number.isNaN(diff)) diff = 0;
     setNewCheckInData(form => ({
       ...form,
       duration: diff,
@@ -111,16 +118,14 @@ function CheckInAddEdit({
   }
 
   function handleChangeEndTime(value: string) {
-    let _startTime = moment(newCheckInData.start_time, DEFAULT_TIME_FORMAT);
+    const _startTime = moment(newCheckInData.start_time, DEFAULT_TIME_FORMAT);
     let _endTime = moment(value, DEFAULT_TIME_FORMAT);
     if (_endTime.isBefore(_startTime)) {
       _endTime = moment(_startTime);
       setEndTime(_endTime.format(DEFAULT_TIME_FORMAT));
     }
-    let diff = convertMillisecondsToHours(
-      _endTime.valueOf() - _startTime.valueOf(),
-    );
-    if (isNaN(diff)) diff = 0;
+    let diff = convertMillisecondsToHours(_endTime.valueOf() - _startTime.valueOf());
+    if (Number.isNaN(diff)) diff = 0;
     setNewCheckInData(form => ({
       ...form,
       duration: diff,
@@ -136,7 +141,7 @@ function CheckInAddEdit({
   }
 
   function handleChangeDuration(value: number) {
-    let _startTime = moment(newCheckInData.start_time, DEFAULT_TIME_FORMAT);
+    const _startTime = moment(newCheckInData.start_time, DEFAULT_TIME_FORMAT);
     const _endTime = moment(_startTime).add(value, "hours");
     if (_endTime.format(DEFAULT_TIME_FORMAT) !== endTime)
       setEndTime(_endTime.format(DEFAULT_TIME_FORMAT));
@@ -148,11 +153,12 @@ function CheckInAddEdit({
 
   function validateForm() {
     const errors = { ...formErrors };
-    (Object.keys(errors) as (keyof CheckInForm)[]).forEach(key => {
+
+    for (const key of Object.keys(errors) as (keyof CheckInForm)[]) {
       if (key === "duration") {
         errors.duration =
-          !isNaN(parseFloat(String(newCheckInData.duration))) &&
-          parseFloat(String(newCheckInData.duration)) > 0
+          !Number.isNaN(Number.parseFloat(String(newCheckInData.duration))) &&
+          Number.parseFloat(String(newCheckInData.duration)) > 0
             ? CheckInStatus.OK
             : CheckInStatus.NumberOnly;
       } else if (key === "tag") {
@@ -166,51 +172,55 @@ function CheckInAddEdit({
             ? CheckInStatus.OK
             : CheckInStatus.RequiredField;
       }
-    });
+    }
+
     setFormErrors(errors);
     return errors;
   }
 
   function handleSubmit(e: any) {
-    isEditing ? handleEditCheckIn(e) : handleCreateCheckIn(e);
+    props.isEditing ? handleEditCheckIn(e) : handleCreateCheckIn(e);
   }
 
-  function handleCreateCheckIn(e: any) {
+  async function handleCreateCheckIn(e: any) {
     e.preventDefault();
     const errors = validateForm();
     if (Object.values(errors).some(Boolean)) return;
-    api.checkin
-      .create(newCheckInData)
-      .then(() => {
-        fetchCheckIns();
+
+    await createCheckIn.mutateAsync(newCheckInData, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["checkin"] });
         setIsCreating(false);
-        setNewCheckInData({ ...initialCheckIn });
-      })
-      .catch(err => console.error(err));
+      },
+    });
   }
 
-  function handleEditCheckIn(e: any) {
+  async function handleEditCheckIn(e: any) {
     e.preventDefault();
-    const errors = validateForm();
-    if (Object.values(errors).some(Boolean)) return;
-    api.checkin
-      .update(editingProps!.id, newCheckInData)
-      .then(() => {
-        fetchCheckIns();
-        stopEditing();
-        setNewCheckInData({ ...initialCheckIn });
-      })
-      .catch(err => console.error(err));
+
+    if (props.isEditing) {
+      const errors = validateForm();
+      if (Object.values(errors).some(Boolean)) return;
+
+      await updateCheckIn.mutateAsync(
+        { id: props.editingProps.id, data: newCheckInData },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["checkin"] });
+            props.stopEditing();
+          },
+        },
+      );
+    }
   }
 
-  return isCreating || isEditing ? (
+  return isCreating || props.isEditing ? (
     <form onSubmit={handleSubmit} className="flex w-full flex-row gap-1">
       <div className="flex-none">
         <DatePicker
           onChange={val =>
             handleChangeRecordDate(
-              val?.format(DEFAULT_DATE_FORMAT) ??
-                moment().format(DEFAULT_DATE_FORMAT),
+              val?.format(DEFAULT_DATE_FORMAT) ?? moment().format(DEFAULT_DATE_FORMAT),
             )
           }
           value={moment(newCheckInData.record_date, DEFAULT_DATE_FORMAT)}
@@ -290,7 +300,7 @@ function CheckInAddEdit({
           name="duration"
           value={newCheckInData.duration}
           inputMode="numeric"
-          onChange={e => handleChangeDuration(parseFloat(e.target.value))}
+          onChange={e => handleChangeDuration(Number.parseFloat(e.target.value))}
           onBlur={handleConfirmChange}
           error={!!formErrors.duration}
           helperText={formErrors.duration}
@@ -302,7 +312,7 @@ function CheckInAddEdit({
         <IconButton
           onClick={() => {
             setNewCheckInData({ ...initialCheckIn });
-            isEditing ? stopEditing() : setIsCreating(false);
+            props.isEditing ? props.stopEditing() : setIsCreating(false);
           }}
         >
           <Close />
@@ -325,5 +335,9 @@ function CheckInAddEdit({
     </Grid>
   );
 }
+
+CheckInAddEdit.defaultProps = {
+  isEditing: false,
+};
 
 export default CheckInAddEdit;

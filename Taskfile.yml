@@ -4,22 +4,18 @@ env:
   ENV: dev
   NAME: time-machine-{{.ENV}}
 
+vars:
+  COMMIT_SHA:
+    sh: git rev-parse --short HEAD
+
 dotenv:
-  - deploy/dev/.env
+  - deploy/{{.ENV}}/.env
 
 tasks:
   default:
     desc: Build and start containers
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml up -d --build --remove-orphans {{.CLI_ARGS}}
-
-  setup:
-    desc: Run initial setup
-    interactive: true
-    cmds:
-      - poetry install
-      - poetry run python -m scripts.make_dotenv dev
-      - poetry run python -m scripts.make_dotenvrc dev
 
   reload-proxy:
     desc: Reload proxy config
@@ -56,14 +52,20 @@ tasks:
     cmds:
       - docker compose -p {{.NAME}} -f deploy/{{.ENV}}/docker-compose.yml down -v --remove-orphans
 
-  register:
-    desc: Register to prod K8s cluster
-    dir: infra
+  makemigrations:
+    desc: Create database migrations
+    dir: api
     cmds:
-      - kubectl apply -f application.yaml
+      - migrate create -ext sql -dir migrations -seq {{.CLI_ARGS}}
 
-  deregister:
-    desc: Deregister from prod K8s cluster
-    dir: infra
+  migrate:
+    desc: Apply database migrations
+    dir: api
     cmds:
-      - kubectl delete -f application.yaml
+      - migrate -source file://migrations -database pgx5://{{.POSTGRESQL_USERNAME}}:{{.POSTGRESQL_PASSWORD}}@localhost:5432/{{.POSTGRESQL_DATABASE}}?sslmode=disable up
+
+  build:
+    desc: Build production Docker image(s)
+    cmds:
+      - docker build -t git.lab.kvd.studio/r/time-machine-postgresql:{{.COMMIT_SHA}} -f pg.Dockerfile .
+      - docker build -t git.lab.kvd.studio/r/time-machine:{{.COMMIT_SHA}} -f Dockerfile .

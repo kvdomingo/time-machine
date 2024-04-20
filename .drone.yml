@@ -60,7 +60,20 @@ steps:
         
         `${DRONE_COMMIT_SHA}`: ${DRONE_COMMIT_MESSAGE}
 
-  - name: Build and push
+  - name: Build and push PostgreSQL
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: GCR_USERNAME
+      password:
+        from_secret: GCR_PASSWORD
+      repo: "git.lab.kvd.studio/${DRONE_REPO}-postgresql"
+      dockerfile: pg.Dockerfile
+      registry: git.lab.kvd.studio
+      tags:
+        - "${DRONE_COMMIT_SHA}"
+
+  - name: Build and push Time Machine
     image: plugins/docker
     settings:
       username:
@@ -68,7 +81,7 @@ steps:
       password:
         from_secret: GCR_PASSWORD
       repo: "git.lab.kvd.studio/${DRONE_REPO}"
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
       registry: git.lab.kvd.studio
       tags:
         - "${DRONE_COMMIT_SHA}"

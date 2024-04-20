@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 
 import { AccessTime, ArrowDropDown } from "@mui/icons-material";
@@ -6,32 +6,27 @@ import {
   Button,
   ButtonGroup,
   ClickAwayListener,
-  FormControlLabel,
   Grow,
   MenuItem,
   MenuList,
   Paper,
   Popper,
-  Switch,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
-import moment, { Moment } from "moment";
+import moment, { type Moment } from "moment";
 import pluralize from "pluralize";
 
 import Stats from "@/components/checkin/Stats.tsx";
-import { useDispatch, useSelector } from "@/store/hooks.ts";
-import {
-  selectCheckIns,
-  selectCombineTags,
-  selectTextLog,
-  updateCombineTags,
-  updateEndDate,
-  updateStartDate,
-} from "@/store/timeSlice.ts";
-import { ViewOption } from "@/types/dateRangeViewOption.ts";
+import type { ViewOption } from "@/types/dateRangeViewOption.ts";
 import { DEFAULT_DATE_FORMAT } from "@/utils/constants.ts";
 
-import useFetchCheckIns from "../../hooks/useFetchCheckIns";
+import type {
+  CheckInResponse,
+  PaginatedResponse,
+  TextLogResponse,
+} from "@/api/types/checkIn.ts";
+
+import { getRouteApi } from "@tanstack/react-router";
 import CheckInList from "./CheckInList";
 import TextLog from "./TextLog";
 
@@ -62,56 +57,71 @@ const VIEW_OPTIONS: ViewOption[] = [
   },
 ];
 
-function CheckInView() {
-  const dispatch = useDispatch();
-  const checkIns = useSelector(selectCheckIns);
-  const textLog = useSelector(selectTextLog);
-  const combineTags = useSelector(selectCombineTags);
-  const fetchCheckIns = useFetchCheckIns();
-  const [page, setPage] = useState(1);
-  const [selectedPeriod, setSelectedPeriod] = useState<ViewOption>(
-    VIEW_OPTIONS[0],
-  );
+interface CheckInViewProps {
+  checkIns: PaginatedResponse<CheckInResponse[]>;
+  textLog: TextLogResponse;
+}
+
+const Route = getRouteApi("/");
+
+function CheckInView({ checkIns, textLog }: CheckInViewProps) {
+  const navigate = Route.useNavigate();
+  const search = Route.useSearch();
+
+  const [selectedPeriod, setSelectedPeriod] = useState<ViewOption>(VIEW_OPTIONS[0]);
   const [openPeriodSelectMenu, setOpenPeriodSelectMenu] = useState(false);
-  const [customRangeStart, setCustomRangeStart] = useState(
-    moment().startOf("isoWeek"),
-  );
+  const [customRangeStart, setCustomRangeStart] = useState(moment().startOf("isoWeek"));
   const [customRangeEnd, setCustomRangeEnd] = useState(moment().endOf("day"));
-  const periodSelectorRef = useRef<HTMLDivElement>(null!);
+  const periodSelectorRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetchCheckIns(page);
-  }, [selectedPeriod, customRangeStart, customRangeEnd, combineTags]);
-
-  function handleChangeViewPeriod(viewPeriod: ViewOption) {
+  async function handleChangeViewPeriod(viewPeriod: ViewOption) {
     setSelectedPeriod(viewPeriod);
     setOpenPeriodSelectMenu(false);
-    dispatch(
-      updateStartDate(
-        viewPeriod.value === "custom"
-          ? customRangeStart.format(DEFAULT_DATE_FORMAT)
-          : viewPeriod.start.format(DEFAULT_DATE_FORMAT),
-      ),
-    );
-    dispatch(
-      updateEndDate(
-        viewPeriod.value === "custom"
-          ? customRangeEnd.format(DEFAULT_DATE_FORMAT)
-          : viewPeriod.end.format(DEFAULT_DATE_FORMAT),
-      ),
-    );
+
+    await navigate({
+      to: "./",
+      search: {
+        ...search,
+        start_date:
+          viewPeriod.value === "custom"
+            ? customRangeStart.format(DEFAULT_DATE_FORMAT)
+            : viewPeriod.start.format(DEFAULT_DATE_FORMAT),
+        end_date:
+          viewPeriod.value === "custom"
+            ? customRangeEnd.format(DEFAULT_DATE_FORMAT)
+            : viewPeriod.end.format(DEFAULT_DATE_FORMAT),
+      },
+    });
   }
 
-  function handleChangeStartDate(value: Moment | null) {
-    const start = value!.startOf("day");
+  async function handleChangeStartDate(value: Moment | null) {
+    if (value == null) return;
+
+    const start = value.startOf("day");
     setCustomRangeStart(start);
-    dispatch(updateStartDate(start.format(DEFAULT_DATE_FORMAT)));
+
+    await navigate({
+      to: "./",
+      search: {
+        ...search,
+        start_date: start.format(DEFAULT_DATE_FORMAT),
+      },
+    });
   }
 
-  function handleChangeEndDate(value: Moment | null) {
-    const end = value!.endOf("day");
+  async function handleChangeEndDate(value: Moment | null) {
+    if (value == null) return;
+
+    const end = value.endOf("day");
     setCustomRangeEnd(end);
-    dispatch(updateEndDate(end.format(DEFAULT_DATE_FORMAT)));
+
+    await navigate({
+      to: "./",
+      search: {
+        ...search,
+        end_date: end.format(DEFAULT_DATE_FORMAT),
+      },
+    });
   }
 
   const checkInHours = useMemo(
@@ -119,8 +129,7 @@ function CheckInView() {
       Object.values(textLog)
         .flat()
         .reduce(
-          (prevCheckin, currentCheckin) =>
-            prevCheckin + currentCheckin.duration,
+          (prevCheckin, currentCheckin) => prevCheckin + currentCheckin.duration,
           0,
         ),
     [textLog],
@@ -169,7 +178,7 @@ function CheckInView() {
                             <MenuItem
                               key={option.value}
                               selected={option.value === selectedPeriod.value}
-                              onClick={() => handleChangeViewPeriod(option)}
+                              onClick={async () => await handleChangeViewPeriod(option)}
                             >
                               {option.label}
                             </MenuItem>
@@ -213,45 +222,29 @@ function CheckInView() {
         </div>
         <div className="col-span-3 mt-auto md:col-span-1" />
         <div className="col-span-3">
-          <CheckInList page={page} setPage={setPage} />
+          <CheckInList data={checkIns} />
         </div>
       </div>
       <div className="my-8 grid grid-cols-2">
         <div className="col-span-2 md:col-span-1">
-          <div className="flex">
-            <div>
-              <p>
-                Going on{" "}
-                <b>
-                  {checkInHours.toFixed(2)} {pluralize("hour", checkInHours)}
-                </b>
-              </p>
-              <p>
-                Remaining{" "}
-                <b>
-                  {remainingHours.toFixed(2)}{" "}
-                  {pluralize("hour", remainingHours)}
-                </b>
-              </p>
-            </div>
-            <div className="my-auto ml-auto">
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={combineTags}
-                    onChange={(_, checked) =>
-                      dispatch(updateCombineTags(checked))
-                    }
-                  />
-                }
-                label="Combine tags"
-              />
-            </div>
+          <div>
+            <p>
+              Going on{" "}
+              <b>
+                {checkInHours.toFixed(2)} {pluralize("hour", checkInHours)}
+              </b>
+            </p>
+            <p>
+              Remaining{" "}
+              <b>
+                {remainingHours.toFixed(2)} {pluralize("hour", remainingHours)}
+              </b>
+            </p>
           </div>
-          <TextLog />
+          <TextLog log={textLog} />
         </div>
         <div className="col-span-2 md:col-span-1">
-          <Stats checkIns={checkIns} />
+          <Stats checkIns={checkIns.results} />
         </div>
       </div>
     </>
