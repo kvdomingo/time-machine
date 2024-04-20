@@ -88,7 +88,7 @@ steps:
         - "${DRONE_COMMIT_SHA}"
 
   - name: Update main manifest repo
-    image: git.lab.kvd.studio/r/update-manifest-image-tag:v0.2
+    image: git.lab.kvd.studio/r/update-manifest-image-tag:v0.2.1
     settings:
       ssh_key:
         from_secret: GITEA_SSH_KEY
@@ -101,7 +101,7 @@ steps:
       app_name: ${DRONE_REPO_NAME}
 
   - name: Update PostgreSQL manifest repo
-    image: git.lab.kvd.studio/r/update-manifest-image-tag:v0.2
+    image: git.lab.kvd.studio/r/update-manifest-image-tag:v0.2.1
     settings:
       ssh_key:
         from_secret: GITEA_SSH_KEY
