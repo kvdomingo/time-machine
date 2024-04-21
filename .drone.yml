@@ -82,7 +82,8 @@ steps:
       password:
         from_secret: GCR_PASSWORD
       repo: "git.lab.kvd.studio/${DRONE_REPO}-migrate"
-      dockerfile: migrate.Dockerfile
+      dockerfile: Dockerfile
+      target: build-api
       registry: git.lab.kvd.studio
       tags:
         - "${DRONE_COMMIT_SHA}"
