@@ -4,7 +4,7 @@ import { tagCacheQueryOptions } from "@/api/queryOptions.ts";
 import CheckInView from "@/components/checkin";
 import PendingComponent from "@/components/shared/PendingComponent.tsx";
 
-import api from "@/api";
+import api, { BaseQueryKey } from "@/api";
 import type { CheckinSearchParams } from "@/types/router.ts";
 import { DEFAULT_DATE_FORMAT } from "@/utils/constants.ts";
 import { Container, Grid, Typography } from "@mui/material";
@@ -27,11 +27,22 @@ export const Route = createFileRoute("/")({
     return Promise.all([
       queryClient.ensureQueryData({
         queryFn: () => api.checkin.list(page, start_date, end_date, tag),
-        queryKey: ["checkins", page, start_date, end_date, tag],
+        queryKey: [BaseQueryKey.CHECKIN, page, start_date, end_date, tag],
+        initialData: {
+          data: {
+            count: 0,
+            next: null,
+            previous: null,
+            results: [],
+          },
+        },
       }),
       queryClient.ensureQueryData({
         queryFn: () => api.checkin.log(start_date, end_date),
-        queryKey: ["textLog", start_date, end_date],
+        queryKey: [BaseQueryKey.TEXT_LOG, start_date, end_date],
+        initialData: {
+          data: { "": [] },
+        },
       }),
       queryClient.ensureQueryData(tagCacheQueryOptions),
     ]);
@@ -45,14 +56,14 @@ function Index() {
     data: { data: checkins },
   } = useSuspenseQuery({
     queryFn: () => api.checkin.list(page, start_date, end_date, tag),
-    queryKey: ["checkins", page, start_date, end_date, tag],
+    queryKey: [BaseQueryKey.CHECKIN, page, start_date, end_date, tag],
   });
 
   const {
     data: { data: textLog },
   } = useSuspenseQuery({
     queryFn: () => api.checkin.log(start_date, end_date),
-    queryKey: ["textLog", start_date, end_date],
+    queryKey: [BaseQueryKey.TEXT_LOG, start_date, end_date],
   });
 
   return (

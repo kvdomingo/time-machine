@@ -5,12 +5,12 @@ import { Grid, IconButton, ListItem, Typography } from "@mui/material";
 import moment from "moment/moment";
 import pluralize from "pluralize";
 
-import api from "@/api";
+import api, { BaseQueryKey } from "@/api";
 
 import { DEFAULT_TIME_FORMAT } from "@/utils/constants.ts";
 
 import type { CheckInResponse } from "@/api/types/checkIn.ts";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import CheckInAddEdit from "./CheckInAddEdit";
 
@@ -24,9 +24,13 @@ function CheckInItem({ checkIn }: CheckInItemProps) {
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
 
+  const queryClient = useQueryClient();
+
   const deleteCheckIn = useMutation({
     mutationFn: (id: string) => api.checkin.delete(id),
-    mutationKey: ["checkin", "delete"],
+    mutationKey: [BaseQueryKey.CHECKIN, "delete"],
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [BaseQueryKey.CHECKIN] }),
   });
 
   const [isEditing, setIsEditing] = useState(false);

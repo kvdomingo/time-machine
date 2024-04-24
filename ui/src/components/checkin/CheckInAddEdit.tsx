@@ -5,7 +5,7 @@ import { Autocomplete, Button, Grid, IconButton, TextField } from "@mui/material
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import moment from "moment";
 
-import api from "@/api";
+import api, { BaseQueryKey } from "@/api";
 import { tagCacheQueryOptions } from "@/api/queryOptions.ts";
 import type { CheckInForm, CheckInResponse } from "@/api/types/checkIn.ts";
 
@@ -57,13 +57,17 @@ function CheckInAddEdit(props: CheckInAddEditProps) {
 
   const createCheckIn = useMutation({
     mutationFn: (data: CheckInForm) => api.checkin.create(data),
-    mutationKey: ["checkin", "create"],
+    mutationKey: [BaseQueryKey.CHECKIN, "create"],
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [BaseQueryKey.CHECKIN] }),
   });
 
   const updateCheckIn = useMutation({
     mutationFn: ({ id, data }: { id: string; data: CheckInForm }) =>
       api.checkin.update(id, data),
-    mutationKey: ["checkin", "update"],
+    mutationKey: [BaseQueryKey.CHECKIN, "update"],
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [BaseQueryKey.CHECKIN] }),
   });
 
   const [endTime, setEndTime] = useState(

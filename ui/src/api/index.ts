@@ -137,3 +137,9 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+export enum BaseQueryKey {
+  CHECKIN = "checkins",
+  TEXT_LOG = "textLog",
+  TAG_CACHE = "tagCache",
+}
