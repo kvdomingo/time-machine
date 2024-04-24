@@ -55,19 +55,23 @@ function CheckInAddEdit(props: CheckInAddEditProps) {
     data: { data: tagCache },
   } = useSuspenseQuery(tagCacheQueryOptions);
 
+  function invalidateAll() {
+    void queryClient.invalidateQueries({ queryKey: [BaseQueryKey.CHECKIN] });
+    void queryClient.invalidateQueries({ queryKey: [BaseQueryKey.TEXT_LOG] });
+    void queryClient.invalidateQueries({ queryKey: [BaseQueryKey.TAG_CACHE] });
+  }
+
   const createCheckIn = useMutation({
     mutationFn: (data: CheckInForm) => api.checkin.create(data),
     mutationKey: [BaseQueryKey.CHECKIN, "create"],
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [BaseQueryKey.CHECKIN] }),
+    onSuccess: invalidateAll,
   });
 
   const updateCheckIn = useMutation({
     mutationFn: ({ id, data }: { id: string; data: CheckInForm }) =>
       api.checkin.update(id, data),
     mutationKey: [BaseQueryKey.CHECKIN, "update"],
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [BaseQueryKey.CHECKIN] }),
+    onSuccess: invalidateAll,
   });
 
   const [endTime, setEndTime] = useState(

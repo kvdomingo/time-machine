@@ -29,8 +29,11 @@ function CheckInItem({ checkIn }: CheckInItemProps) {
   const deleteCheckIn = useMutation({
     mutationFn: (id: string) => api.checkin.delete(id),
     mutationKey: [BaseQueryKey.CHECKIN, "delete"],
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [BaseQueryKey.CHECKIN] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [BaseQueryKey.CHECKIN] });
+      void queryClient.invalidateQueries({ queryKey: [BaseQueryKey.TEXT_LOG] });
+      void queryClient.invalidateQueries({ queryKey: [BaseQueryKey.TAG_CACHE] });
+    },
   });
 
   const [isEditing, setIsEditing] = useState(false);
