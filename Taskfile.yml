@@ -68,5 +68,5 @@ tasks:
     desc: Build production Docker image(s)
     cmds:
       - docker build -t git.lab.kvd.studio/r/time-machine-postgresql:{{.COMMIT_SHA}} -f pg.Dockerfile .
-      - docker build -t git.lab.kvd.studio/r/time-machine-migrate:{{.COMMIT_SHA}} -f Dockerfile --target build-api .
+      - docker build -t git.lab.kvd.studio/r/time-machine-migrate:{{.COMMIT_SHA}} -f migrate.Dockerfile .
       - docker build -t git.lab.kvd.studio/r/time-machine:{{.COMMIT_SHA}} -f Dockerfile .

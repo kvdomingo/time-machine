@@ -31,7 +31,10 @@ services:
       - gateway
 
   postgres:
-    image: bitnami/postgresql:13.14.0-debian-11-r13
+    build:
+      context: ../..
+      dockerfile: pg.Dockerfile
+    image: kvdomingo/time-machine-postgresql:latest
     environment:
       - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
       - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
