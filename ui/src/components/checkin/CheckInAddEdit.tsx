@@ -64,14 +64,12 @@ function CheckInAddEdit(props: CheckInAddEditProps) {
   const createCheckIn = useMutation({
     mutationFn: (data: CheckInForm) => api.checkin.create(data),
     mutationKey: [BaseQueryKey.CHECKIN, "create"],
-    onSuccess: invalidateAll,
   });
 
   const updateCheckIn = useMutation({
     mutationFn: ({ id, data }: { id: string; data: CheckInForm }) =>
       api.checkin.update(id, data),
     mutationKey: [BaseQueryKey.CHECKIN, "update"],
-    onSuccess: invalidateAll,
   });
 
   const [endTime, setEndTime] = useState(
@@ -197,8 +195,9 @@ function CheckInAddEdit(props: CheckInAddEditProps) {
 
     await createCheckIn.mutateAsync(newCheckInData, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["checkin"] });
+        invalidateAll();
         setIsCreating(false);
+        setNewCheckInData({ ...initialCheckIn });
       },
     });
   }
@@ -214,7 +213,7 @@ function CheckInAddEdit(props: CheckInAddEditProps) {
         { id: props.editingProps.id, data: newCheckInData },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["checkin"] });
+            invalidateAll();
             props.stopEditing();
           },
         },
