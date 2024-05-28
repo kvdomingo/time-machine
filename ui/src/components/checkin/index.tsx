@@ -244,7 +244,7 @@ function CheckInView({ checkIns, textLog }: CheckInViewProps) {
           <TextLog log={textLog} />
         </div>
         <div className="col-span-2 md:col-span-1">
-          <Stats checkIns={checkIns.results} />
+          <Stats />
         </div>
       </div>
     </>

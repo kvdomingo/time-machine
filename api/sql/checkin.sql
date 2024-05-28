@@ -35,6 +35,23 @@ WHERE record_date >= @start_date
 ORDER BY start_time DESC
 LIMIT 10 OFFSET @page_offset;
 
+-- name: ListAllCheckinsByDate :many
+SELECT id,
+       created,
+       modified,
+       duration,
+       CONCAT_WS(
+           ':',
+           LPAD(EXTRACT(HOUR FROM start_time)::TEXT, 2, '0'),
+           LPAD(EXTRACT(MINUTE FROM start_time)::TEXT, 2, '0')
+       ) as start_time,
+       record_date,
+       tag,
+       activities
+FROM checkin
+WHERE record_date >= @start_date
+  AND record_date <= @end_date;
+
 -- name: CountAllCheckins :one
 SELECT COUNT(*)
 FROM checkin;

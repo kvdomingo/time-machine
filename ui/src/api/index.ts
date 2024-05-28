@@ -41,6 +41,16 @@ const api = {
       };
       return axi.get("/checkin", { params });
     },
+    listAll(
+      startDate: string = moment().format(DEFAULT_DATE_FORMAT),
+      endDate?: string,
+    ): Promise<AxiosResponse<PaginatedResponse<CheckInResponse[]>>> {
+      const params = {
+        start_date: startDate,
+        end_date: endDate ?? undefined,
+      };
+      return axi.get("/checkin-all", { params });
+    },
     get(id: string): Promise<AxiosResponse<CheckInResponse>> {
       return axi.get(`/checkin/${id}`);
     },

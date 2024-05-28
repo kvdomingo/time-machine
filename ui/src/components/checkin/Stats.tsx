@@ -4,12 +4,10 @@ import Plot from "react-plotly.js";
 
 import { Grid, Paper, Tab, Tabs } from "@mui/material";
 
-import type { CheckInResponse } from "@/api/types/checkIn";
-import { getRouteApi } from "@tanstack/react-router";
+import api, { BaseQueryKey } from "@/api";
 
-interface StatsProps {
-  checkIns: CheckInResponse[];
-}
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 
 interface DataPoint {
   tag: string;
@@ -23,9 +21,18 @@ enum ChartType {
 
 const Route = getRouteApi("/");
 
-function Stats({ checkIns }: StatsProps) {
-  const { tag } = Route.useSearch();
+function Stats() {
+  const { tag, start_date, end_date } = Route.useSearch();
   const byTag = !!tag;
+
+  const {
+    data: {
+      data: { results: checkIns },
+    },
+  } = useSuspenseQuery({
+    queryFn: () => api.checkin.listAll(start_date, end_date),
+    queryKey: [BaseQueryKey.CHECKIN, start_date, end_date],
+  });
 
   const [chartSelector, setChartSelector] = useState<ChartType>(ChartType.Pie);
   const uniqueTags = byTag

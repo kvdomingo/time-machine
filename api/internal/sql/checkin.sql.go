@@ -148,6 +148,69 @@ func (q *Queries) GetCheckin(ctx context.Context, id string) (GetCheckinRow, err
 	return i, err
 }
 
+const listAllCheckinsByDate = `-- name: ListAllCheckinsByDate :many
+SELECT id,
+       created,
+       modified,
+       duration,
+       CONCAT_WS(
+           ':',
+           LPAD(EXTRACT(HOUR FROM start_time)::TEXT, 2, '0'),
+           LPAD(EXTRACT(MINUTE FROM start_time)::TEXT, 2, '0')
+       ) as start_time,
+       record_date,
+       tag,
+       activities
+FROM checkin
+WHERE record_date >= $1
+  AND record_date <= $2
+`
+
+type ListAllCheckinsByDateParams struct {
+	StartDate pgtype.Date `json:"start_date"`
+	EndDate   pgtype.Date `json:"end_date"`
+}
+
+type ListAllCheckinsByDateRow struct {
+	ID         string             `json:"id"`
+	Created    pgtype.Timestamptz `json:"created"`
+	Modified   pgtype.Timestamptz `json:"modified"`
+	Duration   float64            `json:"duration"`
+	StartTime  string             `json:"start_time"`
+	RecordDate pgtype.Date        `json:"record_date"`
+	Tag        string             `json:"tag"`
+	Activities string             `json:"activities"`
+}
+
+func (q *Queries) ListAllCheckinsByDate(ctx context.Context, arg ListAllCheckinsByDateParams) ([]ListAllCheckinsByDateRow, error) {
+	rows, err := q.db.Query(ctx, listAllCheckinsByDate, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListAllCheckinsByDateRow
+	for rows.Next() {
+		var i ListAllCheckinsByDateRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Created,
+			&i.Modified,
+			&i.Duration,
+			&i.StartTime,
+			&i.RecordDate,
+			&i.Tag,
+			&i.Activities,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listCheckins = `-- name: ListCheckins :many
 SELECT id,
        created,
