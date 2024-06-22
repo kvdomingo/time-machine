@@ -2,10 +2,10 @@ import type { Data } from "plotly.js";
 import { useMemo, useState } from "react";
 import Plot from "react-plotly.js";
 
-import { Grid, Paper, Tab, Tabs } from "@mui/material";
-
 import api, { BaseQueryKey } from "@/api";
 
+import type { CheckInResponse } from "@/api/types/checkIn.ts";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 
@@ -14,12 +14,42 @@ interface DataPoint {
   value: number;
 }
 
-enum ChartType {
-  Pie,
-  Bar,
-}
+type ChartType = "pie" | "bar";
 
 const Route = getRouteApi("/");
+
+interface TabContentProps {
+  checkIns: CheckInResponse[];
+  data: Data;
+}
+
+function TabContent({ checkIns, data }: TabContentProps) {
+  return checkIns.length === 0 ? (
+    "No checkins within the selected period"
+  ) : (
+    <Plot
+      data={[data]}
+      layout={{
+        width: 400,
+        height: 500,
+        margin: { t: 0, b: 0, l: 0, r: 0, pad: 0 },
+        legend: {
+          orientation: "h",
+        },
+        font: {
+          family: "Nunito",
+          color: "white",
+        },
+        paper_bgcolor: "transparent",
+        plot_bgcolor: "transparent",
+      }}
+      config={{
+        responsive: true,
+        displayModeBar: false,
+      }}
+    />
+  );
+}
 
 function Stats() {
   const { tag, start_date, end_date } = Route.useSearch();
@@ -34,7 +64,7 @@ function Stats() {
     queryKey: [BaseQueryKey.CHECKIN, start_date, end_date],
   });
 
-  const [chartSelector, setChartSelector] = useState<ChartType>(ChartType.Pie);
+  const [chartSelector, setChartSelector] = useState<ChartType>("pie");
   const uniqueTags = byTag
     ? [...new Set(checkIns.map(c => c.activities))]
     : [...new Set(checkIns.map(c => c.tag))];
@@ -50,7 +80,7 @@ function Stats() {
     stats.sort((a, b) => a.value - b.value);
 
     switch (chartSelector) {
-      case ChartType.Pie: {
+      case "pie": {
         return {
           labels: stats.map(s => s.tag),
           values: stats.map(s => s.value),
@@ -58,7 +88,7 @@ function Stats() {
           textinfo: "value+percent",
         };
       }
-      case ChartType.Bar: {
+      case "bar": {
         return {
           x: stats.map(s => s.value),
           y: stats.map(s => s.tag),
@@ -74,44 +104,22 @@ function Stats() {
   }, [checkIns, chartSelector, byTag, uniqueTags]);
 
   return (
-    <Paper elevation={2} sx={{ p: 2, backgroundColor: "black", mt: 4 }}>
-      <Grid container justifyContent="center">
-        <Tabs
-          value={chartSelector}
-          onChange={(_, newValue) => setChartSelector(newValue)}
-        >
-          <Tab label="pie" />
-          <Tab label="bar" />
-        </Tabs>
-      </Grid>
-      <Grid container mt={2} justifyContent="center" sx={{ overflow: "scroll" }}>
-        {checkIns.length === 0 ? (
-          "No check ins within the selected period"
-        ) : (
-          <Plot
-            data={[data]}
-            layout={{
-              width: 400,
-              height: 500,
-              margin: { t: 0, b: 0, l: 0, r: 0, pad: 0 },
-              legend: {
-                orientation: "h",
-              },
-              font: {
-                family: "Nunito",
-                color: "white",
-              },
-              paper_bgcolor: "transparent",
-              plot_bgcolor: "transparent",
-            }}
-            config={{
-              responsive: true,
-              displayModeBar: false,
-            }}
-          />
-        )}
-      </Grid>
-    </Paper>
+    <Tabs
+      className="mt-8 flex flex-col items-center"
+      value={chartSelector}
+      onValueChange={value => setChartSelector(value as ChartType)}
+    >
+      <TabsList>
+        <TabsTrigger value="pie">Pie</TabsTrigger>
+        <TabsTrigger value="bar">Bar</TabsTrigger>
+      </TabsList>
+      <TabsContent className="mt-4" value="pie">
+        <TabContent checkIns={checkIns} data={data} />
+      </TabsContent>
+      <TabsContent value="bar">
+        <TabContent checkIns={checkIns} data={data} />
+      </TabsContent>
+    </Tabs>
   );
 }
 

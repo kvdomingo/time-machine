@@ -16,7 +16,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         <link rel="apple-touch-icon" href="/logo192.png" />
       </Helmet>
 
-      <main className="mocha">
+      <main>
         <Outlet />
       </main>
 

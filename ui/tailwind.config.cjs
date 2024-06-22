@@ -72,7 +72,7 @@ module.exports = {
     require("tailwindcss-animate"),
     require("@catppuccin/tailwindcss")({
       defaultFlavour: "mocha",
-      prefix: false,
+      prefix: "ctp",
     }),
   ],
 };
