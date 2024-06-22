@@ -226,7 +226,7 @@ function CheckInView({ checkIns, textLog }: CheckInViewProps) {
         </div>
       </div>
       <div className="my-8 grid grid-cols-2">
-        <div className="col-span-2 md:col-span-1">
+        <div className="col-span-2 text-ctp-text md:col-span-1">
           <div>
             <p>
               Going on{" "}

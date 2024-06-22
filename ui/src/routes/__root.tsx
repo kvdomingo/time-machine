@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet";
 import { RouterDevTools } from "@/components/shared/DevTools.tsx";
 import GlobalNotification from "@/components/shared/GlobalNotification.tsx";
 
+import { Toaster } from "@/components/ui/sonner.tsx";
 import type { RouterContext } from "@/types/router.ts";
 import { Suspense } from "react";
 
@@ -20,6 +21,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         <Outlet />
       </main>
 
+      <Toaster position="bottom-left" closeButton />
       <GlobalNotification />
       <Suspense>
         <RouterDevTools />
