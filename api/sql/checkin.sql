@@ -57,7 +57,8 @@ SELECT tag, SUM(duration)::float AS duration
 FROM checkin
 WHERE record_date >= @start_date
   AND record_date <= @end_date
-GROUP BY tag;
+GROUP BY tag
+ORDER BY duration;
 
 -- name: CountAllCheckins :one
 SELECT COUNT(*)

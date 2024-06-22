@@ -154,6 +154,7 @@ FROM checkin
 WHERE record_date >= $1
   AND record_date <= $2
 GROUP BY tag
+ORDER BY duration
 `
 
 type GetCheckinStatsByDateParams struct {
