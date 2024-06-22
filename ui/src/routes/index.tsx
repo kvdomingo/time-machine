@@ -38,18 +38,6 @@ export const Route = createFileRoute("/")({
         },
       }),
       queryClient.ensureQueryData({
-        queryFn: () => api.checkin.listAll(start_date, end_date),
-        queryKey: [BaseQueryKey.CHECKIN, start_date, end_date],
-        initialData: {
-          data: {
-            count: 0,
-            next: null,
-            previous: null,
-            results: [],
-          },
-        },
-      }),
-      queryClient.ensureQueryData({
         queryFn: () => api.checkin.log(start_date, end_date),
         queryKey: [BaseQueryKey.TEXT_LOG, start_date, end_date],
         initialData: {
@@ -57,6 +45,11 @@ export const Route = createFileRoute("/")({
         },
       }),
       queryClient.ensureQueryData(tagCacheQueryOptions),
+      queryClient.ensureQueryData({
+        queryFn: () => api.checkin.getStats(start_date, end_date),
+        queryKey: [BaseQueryKey.CHECKIN, "stats", start_date, end_date],
+        initialData: { data: [] },
+      }),
     ]);
   },
 });

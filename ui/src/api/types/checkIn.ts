@@ -31,3 +31,8 @@ export interface TextLogItem {
 }
 
 export type TextLogResponse = Record<string, TextLogItem[]>;
+
+export interface CheckinStatsItem {
+  tag: string;
+  duration: number;
+}

@@ -13,6 +13,7 @@ import { DEFAULT_DATE_FORMAT } from "../utils/constants";
 import type {
   CheckInForm,
   CheckInResponse,
+  CheckinStatsItem,
   PaginatedResponse,
   TextLogResponse,
 } from "./types/checkIn";
@@ -53,6 +54,16 @@ const api = {
     },
     get(id: string): Promise<AxiosResponse<CheckInResponse>> {
       return axi.get(`/checkin/${id}`);
+    },
+    getStats(
+      startDate: string = moment().format(DEFAULT_DATE_FORMAT),
+      endDate?: string,
+    ): Promise<AxiosResponse<CheckinStatsItem[]>> {
+      const params = {
+        start_date: startDate,
+        end_date: endDate ?? undefined,
+      };
+      return axi.get("/checkin-stats", { params });
     },
     log(
       startDate: string = moment().format(DEFAULT_DATE_FORMAT),

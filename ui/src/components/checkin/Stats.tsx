@@ -4,22 +4,17 @@ import Plot from "react-plotly.js";
 
 import api, { BaseQueryKey } from "@/api";
 
-import type { CheckInResponse } from "@/api/types/checkIn.ts";
+import type { CheckinStatsItem } from "@/api/types/checkIn.ts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
-
-interface DataPoint {
-  tag: string;
-  value: number;
-}
 
 type ChartType = "pie" | "bar";
 
 const Route = getRouteApi("/");
 
 interface TabContentProps {
-  checkIns: CheckInResponse[];
+  checkIns: CheckinStatsItem[];
   data: Data;
 }
 
@@ -52,56 +47,43 @@ function TabContent({ checkIns, data }: TabContentProps) {
 }
 
 function Stats() {
-  const { tag, start_date, end_date } = Route.useSearch();
-  const byTag = !!tag;
+  const { start_date, end_date } = Route.useSearch();
 
   const {
-    data: {
-      data: { results: checkIns },
-    },
+    data: { data: stats },
   } = useSuspenseQuery({
-    queryFn: () => api.checkin.listAll(start_date, end_date),
-    queryKey: [BaseQueryKey.CHECKIN, start_date, end_date],
+    queryFn: () => api.checkin.getStats(start_date, end_date),
+    queryKey: [BaseQueryKey.CHECKIN, "stats", start_date, end_date],
   });
 
   const [chartSelector, setChartSelector] = useState<ChartType>("pie");
-  const uniqueTags = byTag
-    ? [...new Set(checkIns.map(c => c.activities))]
-    : [...new Set(checkIns.map(c => c.tag))];
 
   const data = useMemo<Data>(() => {
-    const stats: DataPoint[] = uniqueTags.map(tag => ({ tag, value: 0 }));
-
-    for (const c of checkIns) {
-      const indexOfTag = stats.findIndex(s => s.tag === (byTag ? c.activities : c.tag));
-      stats[indexOfTag].value += c.duration;
-    }
-
-    stats.sort((a, b) => a.value - b.value);
-
     switch (chartSelector) {
       case "pie": {
         return {
           labels: stats.map(s => s.tag),
-          values: stats.map(s => s.value),
+          values: stats.map(s => s.duration),
           type: "pie",
           textinfo: "value+percent",
         };
       }
       case "bar": {
         return {
-          x: stats.map(s => s.value),
+          x: stats.map(s => s.duration),
           y: stats.map(s => s.tag),
           type: "bar",
           orientation: "h",
-          text: stats.map(s => `${s.tag} ${s.value} ${s.value === 1 ? "hr" : "hrs"}`),
+          text: stats.map(
+            s => `${s.tag} ${s.duration} ${s.duration === 1 ? "hr" : "hrs"}`,
+          ),
         };
       }
       default: {
         return {};
       }
     }
-  }, [checkIns, chartSelector, byTag, uniqueTags]);
+  }, [stats, chartSelector]);
 
   return (
     <Tabs
@@ -114,10 +96,10 @@ function Stats() {
         <TabsTrigger value="bar">Bar</TabsTrigger>
       </TabsList>
       <TabsContent className="mt-4" value="pie">
-        <TabContent checkIns={checkIns} data={data} />
+        <TabContent checkIns={stats} data={data} />
       </TabsContent>
       <TabsContent value="bar">
-        <TabContent checkIns={checkIns} data={data} />
+        <TabContent checkIns={stats} data={data} />
       </TabsContent>
     </Tabs>
   );

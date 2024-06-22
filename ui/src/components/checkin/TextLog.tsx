@@ -45,7 +45,7 @@ function TextLog({ log: data }: TextLogProps) {
       <Box
         component="textarea"
         readOnly
-        className="pointer-events-none h-full w-full rounded-xl border border-ctp-surface2 bg-transparent p-4 text-ctp-text shadow-none active:ring-0 focus-visible:ring-0 focus:ring-0"
+        className="h-full w-full rounded-xl border border-ctp-surface2 bg-transparent p-4 text-ctp-text shadow-none"
         value={text}
       />
     </>
