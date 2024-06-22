@@ -72,6 +72,21 @@ func main() {
 
     api := app.Group("/api")
 
+    api.Use(
+        healthcheck.New(
+            healthcheck.Config{
+                LivenessEndpoint: "/live",
+                LivenessProbe: func(ctx *fiber.Ctx) bool {
+                    return true
+                },
+                ReadinessEndpoint: "/ready",
+                ReadinessProbe: func(ctx *fiber.Ctx) bool {
+                    return true
+                },
+            },
+        ),
+    )
+
     api.Get(
         "/metrics", monitor.New(
             monitor.Config{
@@ -79,6 +94,7 @@ func main() {
             },
         ),
     )
+
     api.Get("/checkin", handlers.CheckinList)
     api.Get("/checkin-all", handlers.CheckinListAllByDate)
     api.Post("/checkin", handlers.CheckinCreate)
