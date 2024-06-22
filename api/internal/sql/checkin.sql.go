@@ -148,6 +148,44 @@ func (q *Queries) GetCheckin(ctx context.Context, id string) (GetCheckinRow, err
 	return i, err
 }
 
+const getCheckinStatsByDate = `-- name: GetCheckinStatsByDate :many
+SELECT tag, SUM(duration)::float AS duration
+FROM checkin
+WHERE record_date >= $1
+  AND record_date <= $2
+GROUP BY tag
+`
+
+type GetCheckinStatsByDateParams struct {
+	StartDate pgtype.Date `json:"start_date"`
+	EndDate   pgtype.Date `json:"end_date"`
+}
+
+type GetCheckinStatsByDateRow struct {
+	Tag      string  `json:"tag"`
+	Duration float64 `json:"duration"`
+}
+
+func (q *Queries) GetCheckinStatsByDate(ctx context.Context, arg GetCheckinStatsByDateParams) ([]GetCheckinStatsByDateRow, error) {
+	rows, err := q.db.Query(ctx, getCheckinStatsByDate, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCheckinStatsByDateRow
+	for rows.Next() {
+		var i GetCheckinStatsByDateRow
+		if err := rows.Scan(&i.Tag, &i.Duration); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listAllCheckinsByDate = `-- name: ListAllCheckinsByDate :many
 SELECT id,
        created,

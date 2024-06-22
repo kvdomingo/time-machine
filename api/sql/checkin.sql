@@ -52,6 +52,13 @@ FROM checkin
 WHERE record_date >= @start_date
   AND record_date <= @end_date;
 
+-- name: GetCheckinStatsByDate :many
+SELECT tag, SUM(duration)::float AS duration
+FROM checkin
+WHERE record_date >= @start_date
+  AND record_date <= @end_date
+GROUP BY tag;
+
 -- name: CountAllCheckins :one
 SELECT COUNT(*)
 FROM checkin;

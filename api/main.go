@@ -16,7 +16,9 @@ import (
     _ "github.com/golang-migrate/migrate/v4"
     "time-machine/config"
     "time-machine/database"
-    "time-machine/handlers"
+    "time-machine/handlers/checkin"
+    "time-machine/handlers/tag"
+    "time-machine/handlers/textLog"
 )
 
 // @title Time Machine
@@ -95,14 +97,15 @@ func main() {
         ),
     )
 
-    api.Get("/checkin", handlers.CheckinList)
-    api.Get("/checkin-all", handlers.CheckinListAllByDate)
-    api.Post("/checkin", handlers.CheckinCreate)
-    api.Get("/checkin/:id", handlers.CheckinRetrieve)
-    api.Put("/checkin/:id", handlers.CheckinUpdate)
-    api.Delete("/checkin/:id", handlers.CheckinDelete)
-    api.Get("/textLog", handlers.TextLogList)
-    api.Get("/tag", handlers.TagList)
+    api.Get("/checkin", checkin.List)
+    api.Get("/checkin-all", checkin.ListAllByDate)
+    api.Get("/checkin-stats", checkin.GetStatsByDate)
+    api.Post("/checkin", checkin.Create)
+    api.Get("/checkin/:id", checkin.Retrieve)
+    api.Put("/checkin/:id", checkin.Update)
+    api.Delete("/checkin/:id", checkin.Delete)
+    api.Get("/textLog", textLog.List)
+    api.Get("/tag", tag.List)
 
     if config.IsProduction() {
         app.Static("/", "./static")

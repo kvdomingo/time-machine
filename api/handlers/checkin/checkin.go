@@ -1,4 +1,4 @@
-package handlers
+package checkin
 
 import (
     "context"
@@ -18,7 +18,7 @@ import (
     "time-machine/models"
 )
 
-func CheckinList(ctx *fiber.Ctx) error {
+func List(ctx *fiber.Ctx) error {
     var err error
     var errResp []validation.ErrorResponse
 
@@ -100,7 +100,7 @@ func CheckinList(ctx *fiber.Ctx) error {
     )
 }
 
-func CheckinListAllByDate(ctx *fiber.Ctx) error {
+func ListAllByDate(ctx *fiber.Ctx) error {
     var err error
     var errResp []validation.ErrorResponse
 
@@ -171,7 +171,60 @@ func CheckinListAllByDate(ctx *fiber.Ctx) error {
     )
 }
 
-func CheckinRetrieve(ctx *fiber.Ctx) error {
+func GetStatsByDate(ctx *fiber.Ctx) error {
+    var err error
+    var errResp []validation.ErrorResponse
+
+    var queries models.ListAllCheckinsInput
+    err = ctx.QueryParser(&queries)
+    if err != nil {
+        return fmt.Errorf("error parsing query params: %v", err)
+    }
+
+    validator := validation.GetValidatorInstance()
+    errResp = validator.Validate(queries)
+    if len(errResp) > 0 {
+        return ctx.Status(fiber.StatusBadRequest).JSON(errResp)
+    }
+
+    parsedStartDate, err := parsers.ParseStartDateString(ctx.Query("start_date"))
+    if err != nil {
+        return ctx.Status(fiber.StatusBadRequest).JSON(
+            validation.GlobalErrorHandlerResp{
+                Message: fmt.Sprintf("error parsing start date: %v", err),
+            },
+        )
+    }
+
+    parsedEndDate, err := parsers.ParseEndDateString(ctx.Query("end_date"))
+    if err != nil {
+        return ctx.Status(fiber.StatusBadRequest).JSON(
+            validation.GlobalErrorHandlerResp{
+                Message: fmt.Sprintf("error parsing end date: %v", err),
+            },
+        )
+    }
+
+    q := database.Get()
+    stats, err := q.GetCheckinStatsByDate(
+        context.Background(), sql.GetCheckinStatsByDateParams{
+            StartDate: pgtype.Date{Time: *parsedStartDate, Valid: true},
+            EndDate:   pgtype.Date{Time: *parsedEndDate, Valid: true},
+        },
+    )
+    if err != nil {
+        log.Errorf("error fetching stats: %v", err)
+        return ctx.Status(fiber.StatusInternalServerError).Send(make([]byte, 0))
+    }
+
+    if len(stats) == 0 {
+        stats = []sql.GetCheckinStatsByDateRow{}
+    }
+
+    return ctx.JSON(stats)
+}
+
+func Retrieve(ctx *fiber.Ctx) error {
     ContextBackground := context.Background()
     q := database.Get()
     id := ctx.Params("id")
@@ -184,7 +237,7 @@ func CheckinRetrieve(ctx *fiber.Ctx) error {
     return ctx.JSON(checkin)
 }
 
-func CheckinCreate(ctx *fiber.Ctx) error {
+func Create(ctx *fiber.Ctx) error {
     ContextBackground := context.Background()
     q := database.Get()
     var checkin sql.Checkin
@@ -246,7 +299,7 @@ func CheckinCreate(ctx *fiber.Ctx) error {
     return ctx.Status(fiber.StatusCreated).JSON(checkin)
 }
 
-func CheckinUpdate(ctx *fiber.Ctx) error {
+func Update(ctx *fiber.Ctx) error {
     ContextBackground := context.Background()
     q := database.Get()
     var checkin sql.Checkin
@@ -311,7 +364,7 @@ func CheckinUpdate(ctx *fiber.Ctx) error {
     return ctx.Status(fiber.StatusAccepted).JSON(checkin)
 }
 
-func CheckinDelete(ctx *fiber.Ctx) error {
+func Delete(ctx *fiber.Ctx) error {
     ContextBackground := context.Background()
     q := database.Get()
     id := ctx.Params("id")
