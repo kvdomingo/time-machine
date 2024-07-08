@@ -4,6 +4,7 @@ services:
       context: ../../api
       dockerfile: dev.Dockerfile
     image: kvdomingo/time-machine-go-api
+    init: true
     env_file: .env
     volumes:
       - ../../api:/app
@@ -21,6 +22,7 @@ services:
 
   frontend:
     image: oven/bun:1.1-alpine
+    init: true
     environment:
       NODE_ENV: development
     working_dir: /web

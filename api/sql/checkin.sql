@@ -7,7 +7,7 @@ SELECT id,
            ':',
            LPAD(EXTRACT(HOUR FROM start_time)::TEXT, 2, '0'),
            LPAD(EXTRACT(MINUTE FROM start_time)::TEXT, 2, '0')
-       ) as start_time,
+       ) AS start_time,
        record_date,
        tag,
        activities
@@ -19,12 +19,12 @@ LIMIT 1;
 SELECT id,
        created,
        modified,
-       duration,
+       ROUND(duration::NUMERIC, 2)::FLOAT AS duration,
        CONCAT_WS(
            ':',
            LPAD(EXTRACT(HOUR FROM start_time)::TEXT, 2, '0'),
            LPAD(EXTRACT(MINUTE FROM start_time)::TEXT, 2, '0')
-       ) as start_time,
+       )                                  AS start_time,
        record_date,
        tag,
        activities
@@ -39,12 +39,12 @@ LIMIT 10 OFFSET @page_offset;
 SELECT id,
        created,
        modified,
-       duration,
+       ROUND(duration::NUMERIC, 2)::FLOAT AS duration,
        CONCAT_WS(
            ':',
            LPAD(EXTRACT(HOUR FROM start_time)::TEXT, 2, '0'),
            LPAD(EXTRACT(MINUTE FROM start_time)::TEXT, 2, '0')
-       ) as start_time,
+       )                                  AS start_time,
        record_date,
        tag,
        activities
@@ -53,11 +53,20 @@ WHERE record_date >= @start_date
   AND record_date <= @end_date;
 
 -- name: GetCheckinStatsByDate :many
-SELECT tag, SUM(duration)::float AS duration
+SELECT tag, ROUND(SUM(duration)::NUMERIC, 2)::FLOAT AS duration
 FROM checkin
 WHERE record_date >= @start_date
   AND record_date <= @end_date
 GROUP BY tag
+ORDER BY duration;
+
+-- name: GetCheckinStatsByDateTag :many
+SELECT ROUND(SUM(duration)::NUMERIC, 2)::FLOAT AS duration, activities
+FROM checkin
+WHERE record_date >= @start_date
+  AND record_date <= @end_date
+  AND tag = @tag
+GROUP BY activities
 ORDER BY duration;
 
 -- name: CountAllCheckins :one
@@ -110,7 +119,7 @@ FROM checkin;
 -- name: ListTextLog :many
 SELECT record_date,
        tag,
-       SUM(duration)::float as duration,
+       ROUND(SUM(duration)::NUMERIC, 2)::FLOAT AS duration,
        activities
 FROM checkin
 WHERE record_date >= @start_date
