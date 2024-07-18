@@ -90,6 +90,7 @@ function CheckInView({ checkIns, textLog }: CheckInViewProps) {
           viewPeriod.value === "custom"
             ? customRangeEnd.format(DEFAULT_DATE_FORMAT)
             : viewPeriod.end.format(DEFAULT_DATE_FORMAT),
+        page: 1,
       },
     });
   }
@@ -105,6 +106,7 @@ function CheckInView({ checkIns, textLog }: CheckInViewProps) {
       search: {
         ...search,
         start_date: start.format(DEFAULT_DATE_FORMAT),
+        page: 1,
       },
     });
   }
@@ -120,6 +122,7 @@ function CheckInView({ checkIns, textLog }: CheckInViewProps) {
       search: {
         ...search,
         end_date: end.format(DEFAULT_DATE_FORMAT),
+        page: 1,
       },
     });
   }
