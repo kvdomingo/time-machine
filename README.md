@@ -6,7 +6,7 @@ One of the many UIs for the TM checkin system.
 
 1. Clone the repo.
 2. Download [Task](https://taskfile.dev/installation/) and add to your `PATH`.
-3. Copy the contents of `.env.example` into a new file in `/deploy/prod` named `.env`, and generate the missing values.
+3. Copy the contents of `deploy/prod/.env.example` into a new file in the same directory named `.env`, and generate the missing values.
 4. Set up [Traefik](https://doc.traefik.io/traefik/providers/docker/). Follow the instructions in the link to set up a
    global instance of Traefik, and name the Traefik network `gateway`. This will allow you to
    access the app as `time-machine.localhost`. If you do not have or do not want to set up Traefik,

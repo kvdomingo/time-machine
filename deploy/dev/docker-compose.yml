@@ -42,7 +42,7 @@ services:
     build:
       context: ../..
       dockerfile: pg.Dockerfile
-    image: kvdomingo/time-machine-postgresql
+    image: kvdomingo/postgresql:bitnami-16.2.0-debian-12-r16-pg_idkit-0.2.3
     env_file: .env
     volumes:
       - db-data:/bitnami/postgresql
