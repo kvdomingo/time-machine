@@ -116,9 +116,10 @@ FROM checkin;
 SELECT record_date,
        tag,
        ROUND(SUM(duration)::NUMERIC, 5)::FLOAT AS duration,
-       activities
+       activities,
+       MIN(start_time::TIME)                   AS start_time
 FROM checkin
 WHERE record_date >= @start_date
   AND record_date <= @end_date
 GROUP BY record_date, tag, activities
-ORDER BY record_date;
+ORDER BY record_date, start_time;

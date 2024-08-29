@@ -389,12 +389,13 @@ const listTextLog = `-- name: ListTextLog :many
 SELECT record_date,
        tag,
        ROUND(SUM(duration)::NUMERIC, 5)::FLOAT AS duration,
-       activities
+       activities,
+       MIN(start_time::TIME)                   AS start_time
 FROM checkin
 WHERE record_date >= $1
   AND record_date <= $2
 GROUP BY record_date, tag, activities
-ORDER BY record_date
+ORDER BY record_date, start_time
 `
 
 type ListTextLogParams struct {
@@ -407,6 +408,7 @@ type ListTextLogRow struct {
 	Tag        string      `json:"tag"`
 	Duration   float64     `json:"duration"`
 	Activities string      `json:"activities"`
+	StartTime  interface{} `json:"start_time"`
 }
 
 func (q *Queries) ListTextLog(ctx context.Context, arg ListTextLogParams) ([]ListTextLogRow, error) {
@@ -423,6 +425,7 @@ func (q *Queries) ListTextLog(ctx context.Context, arg ListTextLogParams) ([]Lis
 			&i.Tag,
 			&i.Duration,
 			&i.Activities,
+			&i.StartTime,
 		); err != nil {
 			return nil, err
 		}
