@@ -63,19 +63,20 @@ function Stats() {
       case "pie": {
         return {
           labels: stats.map(s => s.tag),
-          values: stats.map(s => s.duration),
+          values: stats.map(s => s.duration.toFixed(2)),
           type: "pie",
           textinfo: "value+percent",
         };
       }
       case "bar": {
         return {
-          x: stats.map(s => s.duration),
+          x: stats.map(s => s.duration.toFixed(2)),
           y: stats.map(s => s.tag),
           type: "bar",
           orientation: "h",
           text: stats.map(
-            s => `${s.tag} ${s.duration} ${s.duration === 1 ? "hr" : "hrs"}`,
+            s =>
+              `#${s.tag} ${s.duration.toFixed(2)} ${s.duration === 1 ? "hr" : "hrs"}`,
           ),
         };
       }
