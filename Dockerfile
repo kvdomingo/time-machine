@@ -16,9 +16,9 @@ WORKDIR /build
 
 COPY ./api ./
 
-RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest && \
-    go mod download && \
-    go build -a -o app .
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.17.1 && \
+  go mod download && \
+  go build -a -o app .
 
 FROM scratch AS prod
 
