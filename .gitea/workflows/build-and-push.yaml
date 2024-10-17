@@ -3,7 +3,7 @@ on:
     branches: [ main ]
     paths-ignore:
       - deploy/**
-      - infra/**
+      - helm/**
 
 jobs:
   build-and-push:
