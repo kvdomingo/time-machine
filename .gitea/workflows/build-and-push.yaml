@@ -1,9 +1,6 @@
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - deploy/**
-      - helm/**
 
 jobs:
   build-and-push:
