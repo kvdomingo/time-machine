@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "time-machine.labels" . | nindent 4 }}
   annotations:
-    {{ .Values.annotations | nindent 4 }}
+    {{ toYaml .Values.annotations | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
