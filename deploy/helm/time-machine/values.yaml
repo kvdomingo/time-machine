@@ -32,6 +32,7 @@ annotations:
   keel.sh/match-tag: "true"
   keel.sh/trigger: "poll"
   keel.sh/pollSchedule: "@every 3m"
+  secrets.infisical.com/auto-reload: "true"
 
 podAnnotations: { }
 
