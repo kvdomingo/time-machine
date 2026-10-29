@@ -5,6 +5,7 @@ import (
     "fmt"
     "log"
 
+    "github.com/ansrivas/fiberprometheus/v2"
     "github.com/gofiber/contrib/swagger"
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/healthcheck"
@@ -45,6 +46,10 @@ func main() {
 
     app.Use(recover.New())
     app.Use(logger.New())
+
+    prometheus := fiberprometheus.New("time-machine")
+    prometheus.RegisterAt(app, "/api/prometheus")
+    app.Use(prometheus.Middleware)
     app.Use(
         healthcheck.New(
             healthcheck.Config{

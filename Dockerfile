@@ -6,7 +6,7 @@ COPY ./ui/ ./
 
 RUN bun install && bun run build
 
-FROM golang:1.21 AS build-api
+FROM golang:1.25 AS build-api
 
 ENV CGO_ENABLED 0
 ENV GOOS linux
